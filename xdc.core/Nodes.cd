@@ -1,0 +1,294 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="xdc.Nodes.CaseNode" Collapsed="true">
+    <Position X="19.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\CaseNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.ChanceNode" Collapsed="true">
+    <Position X="20.25" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\ChanceNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAQIAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.ConstShared" Collapsed="true">
+    <Position X="29.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\ConstNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAACAAAAAgAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.ConstNode" Collapsed="true">
+    <Position X="13.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\ConstNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAQAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.FieldNode" Collapsed="true">
+    <Position X="18" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\FieldNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAQAhAAAQIAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.FileValueShared" Collapsed="true">
+    <Position X="25.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\FileValueNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAABAAAAAQAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.FileValueNode" Collapsed="true">
+    <Position X="15.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\FileValueNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAwAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.MetaNode" Collapsed="true">
+    <Position X="21.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\MetaNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.AttachedNode" Collapsed="true">
+    <Position X="25.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\Node.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.AttachedNode&lt;T&gt;" Collapsed="true">
+    <Position X="27.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\Node.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.Node" Collapsed="true">
+    <Position X="17.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\NodeContext.cs</FileName>
+      <NewMemberFileName>Nodes\Node.cs</NewMemberFileName>
+      <HashCode>AQAAAAAAIAAgACBAAAAESAAIAAgAABAFAIAAggEAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.NodeTypes" Collapsed="true">
+    <Position X="27.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\NodeTypes.cs</FileName>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAgA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.NodeValue" Collapsed="true">
+    <Position X="7.75" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\NodeValue.cs</FileName>
+      <HashCode>EAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.TerminalNodeValue" Collapsed="true">
+    <Position X="7.75" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\NodeValue.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.StaticNodeValue" Collapsed="true">
+    <Position X="5.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\NodeValue.cs</FileName>
+      <HashCode>EAAAAAAAAAAAAAAEAAAAAAAAAAAAACAAAAAgAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.DynamicNodeValue" Collapsed="true">
+    <Position X="7.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\NodeValue.cs</FileName>
+      <HashCode>AAACAAAAAgAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.NullNodeValue" Collapsed="true">
+    <Position X="10" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\NodeValue.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.NullNode" Collapsed="true">
+    <Position X="15.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\NullNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.ObjectNode" Collapsed="true">
+    <Position X="18" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\ObjectNode.cs</FileName>
+      <HashCode>AAAABAAAAAAAAAAAAAAABAAACAAAAAAgAAAQIEAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.ProxyNode" Collapsed="true">
+    <Position X="19.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\ProxyNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.RefNode" Collapsed="true">
+    <Position X="15.75" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\RefNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAwAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.RootNode" Collapsed="true">
+    <Position X="18" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\RootNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAQIACAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.SetConstNode" Collapsed="true">
+    <Position X="22" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\SetConstNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAQIAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.TemplateCache" Collapsed="true">
+    <Position X="29.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\TemplateNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAABAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.TemplateNode" Collapsed="true">
+    <Position X="22" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\TemplateNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.TerminalNode" Collapsed="true">
+    <Position X="14.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\TerminalNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.TextNode" Collapsed="true">
+    <Position X="13.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\TextNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAwAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.TimesNode" Collapsed="true">
+    <Position X="20.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\TimesNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.TryNode" Collapsed="true">
+    <Position X="20.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\TryNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAQIAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.ValueFileNode" Collapsed="true">
+    <Position X="22" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\ValueFileNode.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.FileValues" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="31" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\ValueFiles.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAABAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.FileValues&lt;T&gt;" Collapsed="true">
+    <Position X="7.75" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\ValueFiles.cs</FileName>
+      <HashCode>AAIAgAAAAIAAAADAAAAAAAQAAAAAACAAAQACQAAAAgA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="xdc.Nodes.LineFileValues" Collapsed="true">
+    <Position X="5.5" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\ValueFiles.cs</FileName>
+      <HashCode>AAAAgAAAAAAAAABAAAAAAAAAAAAAAAAAAQAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.CSVFileValues" Collapsed="true">
+    <Position X="7.75" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\ValueFiles.cs</FileName>
+      <HashCode>AAAAgAAAAAAAAABAAAAAAAAAAACAAAAAAQAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.XMLFileValues" Collapsed="true">
+    <Position X="10" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\ValueFiles.cs</FileName>
+      <HashCode>AAAAgAAAAAAAAABAAAAAAAAAAAAAAAAAAQAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.SetFileValues" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="25.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\ValueFiles.cs</FileName>
+      <HashCode>AAAAgAAAAIAAAADAAAABAAAAABAAAAAAAQAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="xdc.Nodes.TextTerminalParser" Collapsed="true">
+    <Position X="31" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Parsers\TextTerminalParser.cs</FileName>
+      <HashCode>AAAgAAAAAAAAAAAAAAgAQAAAAAAAAAQAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.XMLNodeParser" Collapsed="true">
+    <Position X="25.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Parsers\XMLNodeParser.cs</FileName>
+      <HashCode>AAAiAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="xdc.Nodes.SQLRenderer" Collapsed="true">
+    <Position X="27.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Renderers\SQLRenderer.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAgCAAAQAAIAAAAAAAAAQBDgEAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="xdc.Nodes.IFileValues" Collapsed="true">
+    <Position X="25.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\ValueFiles.cs</FileName>
+      <HashCode>AAAAgAAAAIAAAABAAAAAAAAAAAAAAAAAAQAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="xdc.Nodes.ValueFileMode" Collapsed="true">
+    <Position X="25.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Nodes\ValueFiles.cs</FileName>
+      <HashCode>AAIgAAAAAAAAAAAgAAAAAAAAAAAABAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Enum>
+</ClassDiagram>

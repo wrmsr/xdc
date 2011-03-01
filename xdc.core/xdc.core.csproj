@@ -1,0 +1,92 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{EFC09C29-B611-4357-BFCB-D398BD906FBA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>xdc.core</RootNamespace>
+    <AssemblyName>xdc.core</AssemblyName>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Nodes\CaseNode.cs" />
+    <Compile Include="Nodes\ChanceNode.cs" />
+    <Compile Include="Nodes\ConstNode.cs" />
+    <Compile Include="Nodes\FieldNode.cs" />
+    <Compile Include="Nodes\FileValueNode.cs" />
+    <Compile Include="Nodes\ForEachNode.cs" />
+    <Compile Include="Nodes\MetaNode.cs" />
+    <Compile Include="Nodes\Node.cs" />
+    <Compile Include="Nodes\NodeContext.cs" />
+    <Compile Include="Nodes\NodeTypes.cs" />
+    <Compile Include="Nodes\NodeValue.cs" />
+    <Compile Include="Nodes\NullNode.cs" />
+    <Compile Include="Nodes\ObjectNode.cs" />
+    <Compile Include="Nodes\ProxyNode.cs" />
+    <Compile Include="Nodes\RefNode.cs" />
+    <Compile Include="Nodes\RootNode.cs" />
+    <Compile Include="Nodes\SetConstNode.cs" />
+    <Compile Include="Nodes\TemplateNode.cs" />
+    <Compile Include="Nodes\TerminalNode.cs" />
+    <Compile Include="Nodes\TextNode.cs" />
+    <Compile Include="Nodes\TimesNode.cs" />
+    <Compile Include="Nodes\TryNode.cs" />
+    <Compile Include="Nodes\ValueFileNode.cs" />
+    <Compile Include="Nodes\ValueFiles.cs" />
+    <Compile Include="Parsers\TextTerminalParser.cs" />
+    <Compile Include="Parsers\XMLNodeParser.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Renderers\Renderer.cs" />
+    <Compile Include="Renderers\SQLRenderer.cs" />
+    <Compile Include="Writers\ConsoleObjectWriter.cs" />
+    <Compile Include="Writers\IObjectWriter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\xdc.common\xdc.common.csproj">
+      <Project>{339BE148-A15C-4637-BADC-07D9BBC4A1E4}</Project>
+      <Name>xdc.common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Nodes.cd" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)\bin\$(TargetFileName)"</PostBuildEvent>
+  </PropertyGroup>
+</Project>
