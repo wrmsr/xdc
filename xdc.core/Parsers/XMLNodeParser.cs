@@ -47,6 +47,7 @@ namespace xdc.Nodes {
 				throw new ApplicationException("Invalid xml reader state");
 
 			Dictionary<string, string> atts = XmlUtils.ReadAtts(xr);
+
 			xr.MoveToElement();
 
 			Type nodeType = GetNodeType(xr.Name, atts, parentNode);

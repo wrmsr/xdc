@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Text;
 
 namespace xdc.Nodes {
@@ -31,6 +33,23 @@ namespace xdc.Nodes {
 			dict.Add("ForEach", typeof(ForEachNode));
 
 			return dict;
+		}
+		
+		static public void Dump(TextWriter tw) {
+			foreach(Type t in NodeTypes.Dict.Values) {
+				tw.WriteLine(t.Name);
+
+				foreach(Type c in (Type[])t
+					.GetField("childTypes", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+					.GetValue(null)) {
+					tw.WriteLine("  " + c.Name + ":");
+					foreach(Type ct in NodeTypes.Dict.Values)
+						if(c == ct || ct.IsSubclassOf(c))
+							tw.WriteLine("    " + ct.Name);
+				}
+
+				tw.WriteLine();
+			}
 		}
 	}
 }

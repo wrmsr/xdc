@@ -25,10 +25,7 @@ namespace xdc.Nodes {
 		public abstract void RenderObjectAs(ObjectContext context, ObjectClass objectClass);
 
 		public void Render(ObjectContext context) {
-			bool write = context.ObjectClass.Atts.GetBool("Write");
-
-			if(write)
-				Writer.WriteEnterObject(context.ObjectClass.Name);
+			Writer.EnterObject(context.Node);
 
 			foreach(ObjectClass objectClass in Enumerations.Reverse(context.ObjectClass.Bases))
 				RenderObjectAs(context, objectClass);
@@ -41,8 +38,7 @@ namespace xdc.Nodes {
 
 			Flush();
 
-			if(write)
-				Writer.WriteLeaveObject(context.ObjectClass.Name);
+			Writer.LeaveObject(context.Node);
 
 			objectCount++;
 
@@ -56,11 +52,7 @@ namespace xdc.Nodes {
 		}
 
 		public void Render(IEnumerable<ObjectContext> contexts) {
-			Writer.WriteEnterObject("Objects");
-
 			RenderQuiet(contexts);
-
-			Writer.WriteLeaveObject("Objects");
 		}
 	}
 }

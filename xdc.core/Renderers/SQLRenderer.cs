@@ -17,14 +17,17 @@ namespace xdc.Nodes {
 		public abstract void Emit(string sql);
 		public abstract void Flush();
 
-		public abstract void WriteEnterObject(string name);
-		public abstract void WriteLeaveObject(string name);
+		public abstract void WriteStart();
+		public abstract void WriteEnd();
+
+		public abstract void EnterObject(ObjectNode objectNode);
+		public abstract void LeaveObject(ObjectNode objectNode);
 		
-		public void WriteField(string name, string value) {
+		public void WriteField(FieldNode fieldNode, string value) {
 			throw new NotSupportedException();
 		}
 
-		public abstract void WriteFieldSQL(string name, string sql);
+		public abstract void WriteFieldSQL(FieldNode fieldNode, string sql);
 	}
 
 	public class TextSQLRenderTarget : SQLRenderTarget {
@@ -78,16 +81,31 @@ namespace xdc.Nodes {
 			dst.Flush();
 		}
 
-		public override void WriteEnterObject(string name) {
-			Emit(string.Format("print '<{0}>';" + Environment.NewLine, name));
+		public override void WriteStart() {
+			Emit("print '<Objects>';");
 		}
 
-		public override void WriteLeaveObject(string name) {
-			Emit(string.Format("print '</{0}>';" + Environment.NewLine, name));
+		public override void WriteEnd() {
+			Emit("print '</Objects>';");
 		}
 
-		public override void WriteFieldSQL(string name, string sql) {
-			Emit(string.Format("print '<{0}>' + {1} + '</{0}>';" + Environment.NewLine, name, sql));
+		private int objectCount = 0;
+
+		public override void EnterObject(ObjectNode objectNode) {
+			if(++objectCount % 100 == 0)
+				Emit(string.Format("print '#{0}';" + Environment.NewLine, objectCount));
+
+			if(objectNode.ObjectClass.Atts.GetBool("Write"))
+				Emit(string.Format("print '<{0}>';" + Environment.NewLine, objectNode.ObjectClass.Name));
+		}
+
+		public override void LeaveObject(ObjectNode objectNode) {
+			if(objectNode.ObjectClass.Atts.GetBool("Write"))
+				Emit(string.Format("print '</{0}>';" + Environment.NewLine, objectNode.ObjectClass.Name));
+		}
+
+		public override void WriteFieldSQL(FieldNode fieldNode, string sql) {
+			Emit(string.Format("print '<{0}>' + {1} + '</{0}>';" + Environment.NewLine, fieldNode.ObjectClassField.Name, sql));
 		}
 	}
 
@@ -95,13 +113,18 @@ namespace xdc.Nodes {
 		private class Var {
 			public string DataType = null;
 			public object Value = null;
+			public bool IsSet = false;
 		}
 
 		private Dictionary<string, Var> declaredVars = new Dictionary<string, Var>();
 
 		private SqlConnection conn = null;
 		private IObjectWriter writer = null;
-		
+
+		private const int bufSize = 0x40000;
+		private const int execInterval = bufSize - 0x1000;
+		private StringBuilder sb = new StringBuilder(bufSize);
+
 		private StringWriter sw = null;
 		private TextSQLRenderTarget txt = null;
 
@@ -112,7 +135,9 @@ namespace xdc.Nodes {
 		protected TextSQLRenderTarget Txt {
 			get {
 				if(txt == null) {
-					sw = new StringWriter();
+					sb.Length = 0;
+
+					sw = new StringWriter(sb);
 					txt = new TextSQLRenderTarget(sw);
 
 					EmitPrefix();
@@ -131,6 +156,14 @@ namespace xdc.Nodes {
 			writer = _writer;
 		}
 
+		public override void WriteStart() {
+			throw new NotImplementedException();
+		}
+
+		public override void WriteEnd() {
+			throw new NotImplementedException();
+		}
+
 		protected void EmitPrefix() {
 			foreach(KeyValuePair<string, Var> cur in declaredVars) {
 				Txt.DeclareVar(cur.Key, cur.Value.DataType);
@@ -142,7 +175,10 @@ namespace xdc.Nodes {
 
 		protected void EmitSuffix() {
 			foreach(KeyValuePair<string, Var> cur in declaredVars)
-				Emit(string.Format("select @{0} '{0}';" + Environment.NewLine, cur.Key));
+				if(cur.Value.IsSet) {
+					Emit(string.Format("select @{0} '{0}';" + Environment.NewLine, cur.Key));
+					cur.Value.IsSet = false;
+				}
 		}
 
 		public override bool DeclareVar(string name, string type) {
@@ -159,6 +195,7 @@ namespace xdc.Nodes {
 
 			Var var = new Var();
 			var.DataType = type;
+			var.IsSet = true;
 
 			declaredVars[name] = var;
 
@@ -167,43 +204,86 @@ namespace xdc.Nodes {
 
 		public override void SetVar(string name, string value) {
 			Txt.SetVar(name, value);
+						
+			Var existingVar = null;
+
+			if(!declaredVars.TryGetValue(name, out existingVar))
+				throw new ApplicationException("Variable not found: " + name);
+
+			existingVar.IsSet = true;
 		}
 
 		public override void Emit(string sql) {
 			Txt.Emit(sql);
 		}
 
-		public override void Flush() {
+		private Queue<Node> writeQueue = new Queue<Node>();
+
+		public void Exec() {
 			EmitSuffix();
 			Txt.Flush();
-			
-			using(SqlCommand cmd = new SqlCommand(sw.ToString(), conn))
-			using(SqlDataReader reader = cmd.ExecuteReader())
-			while(reader.Read()) {
-				string name = reader.GetName(0);
-				Var var = null;
+			sw.Flush();
 
-				if(name.StartsWith("!"))
-					Writer.WriteField(name.Substring(1), Convert.ToString(reader.GetValue(0)));
-				else if(declaredVars.TryGetValue(reader.GetName(0), out var)) {
-					var.Value = reader.GetValue(0);					}
+			Console.Error.WriteLine("Executing SQL Buffer: {0} Bytes, {1} Writes Queued", sb.Length, writeQueue.Count);
 
-				reader.NextResult();
+			SqlInfoMessageEventHandler infoMessage = new SqlInfoMessageEventHandler(conn_InfoMessage);
+
+			conn.InfoMessage += infoMessage;
+			try {
+				using(SqlCommand cmd = new SqlCommand(sb.ToString(), conn))
+				using(SqlDataReader reader = cmd.ExecuteReader())
+				while(reader.Read()) {
+					Var var = null;
+
+					if(declaredVars.TryGetValue(reader.GetName(0), out var))
+						var.Value = reader.GetValue(0);
+
+					reader.NextResult();
+				}
 			}
+			finally {
+				conn.InfoMessage -= infoMessage;
+			}
+
+			if(writeQueue.Count != 0)
+				throw new ApplicationException("WriteStack mismatch, items left: " + writeQueue.Count);
 
 			txt = null;
 		}
 
-		public override void WriteEnterObject(string name) {
-			Writer.WriteEnterObject(name);
+		void conn_InfoMessage(object sender, SqlInfoMessageEventArgs e) {
+			foreach(SqlError err in e.Errors) {
+				if(err.Message == "+")
+					Writer.EnterObject((ObjectNode)writeQueue.Dequeue());
+				else if(err.Message == "-")
+					Writer.LeaveObject((ObjectNode)writeQueue.Dequeue());
+				else if(err.Message.StartsWith("="))
+					Writer.WriteField((FieldNode)writeQueue.Dequeue(), err.Message.Substring(1));
+				else
+					Console.Error.WriteLine(err.ToString());
+			}
 		}
 
-		public override void WriteLeaveObject(string name) {
-			Writer.WriteLeaveObject(name);
+		public override void Flush() {
+			Txt.Flush();
+
+			if(sb.Length > execInterval)
+				Exec();
 		}
 
-		public override void WriteFieldSQL(string name, string sql) {
-			Emit(string.Format("select {1} '!{0}';" + Environment.NewLine, name, sql));
+		public override void EnterObject(ObjectNode objectNode) {
+			writeQueue.Enqueue(objectNode);
+			Emit("print '+';" + Environment.NewLine);
+		}
+
+		public override void LeaveObject(ObjectNode objectNode) {
+			writeQueue.Enqueue(objectNode);
+			Emit("print '-';" + Environment.NewLine);
+		}
+
+		public override void WriteFieldSQL(FieldNode fieldNode, string sql) {
+			writeQueue.Enqueue(fieldNode);
+			Emit(string.Format("print '=' + {0};" + Environment.NewLine, sql));
 		}
 	}
 
@@ -215,7 +295,7 @@ namespace xdc.Nodes {
 		}
 
 		public SQLRenderer(SQLRenderTarget _target)
-			: base(_target.Writer) {
+			: base(_target) {
 			target = _target;
 		}
 
@@ -324,7 +404,7 @@ namespace xdc.Nodes {
 				sb.Append(rendered);
 
 				if(writeObject && field.ObjectClassField.Atts.GetBool("Write"))
-					Target.WriteFieldSQL(field.ObjectClassField.Name, rendered);
+					Target.WriteFieldSQL(field.Node, rendered);
 			}
 
 			sb.AppendLine();
@@ -342,7 +422,7 @@ namespace xdc.Nodes {
 				Target.SetVar(id.Name, "scope_identity()");
 
 				if(writeObject && id.ObjectClassField.Atts.GetBool("Write"))
-					Target.WriteFieldSQL(id.ObjectClassField.Name, "cast(scope_identity() as varchar(500))");
+					Target.WriteFieldSQL(id.Node, "cast(scope_identity() as varchar(500))");
 			}
 		}
 

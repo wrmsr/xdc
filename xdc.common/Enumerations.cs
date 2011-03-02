@@ -24,6 +24,14 @@ namespace xdc.common {
 					yield return v;
 		}
 
+		static public IEnumerable<T> Skip<T>(IEnumerable<T> vs, int c) {
+			foreach(T v in vs)
+				if(c > 0)
+					c--;
+				else
+					yield return v;
+		}
+
 		static public IEnumerable<X> ChangeType<T, X>(IEnumerable<T> e) {
 			foreach(T v in e)
 				yield return (X)Convert.ChangeType(v, typeof(X));

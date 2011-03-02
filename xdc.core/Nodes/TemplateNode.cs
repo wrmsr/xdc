@@ -40,7 +40,8 @@ namespace xdc.Nodes {
 				throw new ApplicationException("Could not load file: " + File);
 
 			foreach(XmlNode child in template.ChildNodes)
-				AddChild(XMLNodeParser.Parse(this, child));
+				if(child.NodeType == XmlNodeType.Element)
+					AddChild(XMLNodeParser.Parse(this, child));
 		}
 	}
 }

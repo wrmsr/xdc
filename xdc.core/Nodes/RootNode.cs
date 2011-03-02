@@ -7,6 +7,13 @@ namespace xdc.Nodes {
 	public class RootContext : NodeContext {
 		private Dictionary<Type, object> shared = new Dictionary<Type, object>();
 
+		/*
+		private isDummyRun = false;
+		public bool IsDummyRun {
+			get { return isDummyRun; }
+		}
+		*/
+
 		public object GetShared(Type sharedType) {
 			if(sharedType == null)
 				return null;

@@ -20,6 +20,7 @@ namespace xdc.common {
 		}
 
 		public bool TryAdd(T item) {
+			/*
 			try {
 				Add(item);
 				return true;
@@ -27,6 +28,14 @@ namespace xdc.common {
 			catch(Exception) {
 				return false;
 			}
+			*/
+
+			if(dct.ContainsKey(item))
+				return false;
+			
+			dct.Add(item, 0);
+
+			return true;
 		}
 
 		public void AddRange(IEnumerable<T> items) {
