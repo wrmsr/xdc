@@ -52,7 +52,7 @@ namespace xdc.Nodes {
 
 			Type nodeType = GetNodeType(xr.Name, atts, parentNode);
 
-			Node node = (Node)Activator.CreateInstance(nodeType, new object[] { parentNode, atts });
+			Node node = Node.Create(nodeType, parentNode, atts );
 
 			while(xr.Read()) {
 				if(xr.IsStartElement()) {

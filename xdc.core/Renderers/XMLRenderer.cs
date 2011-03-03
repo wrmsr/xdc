@@ -21,6 +21,8 @@ namespace xdc.Nodes {
 
 		public override void EnterObject(ObjectNode objectNode) {
 			xw.WriteStartElement(objectNode.ObjectClass.Name);
+
+			xw.WriteAttributeString("Name", objectNode.Name);
 		}
 
 		public override void LeaveObject(ObjectNode objectNode) {
@@ -37,6 +39,8 @@ namespace xdc.Nodes {
 
 			foreach(FieldContext field in context.Fields) {
 				xw.WriteStartElement(field.ObjectClassField.Name);
+
+				xw.WriteAttributeString("Name", field.Name);
 
 				foreach(TerminalNodeValue t in field.Value.Terminals)
 					xw.WriteElementString(t.GetType().Name, t.Display);

@@ -14,6 +14,12 @@ namespace xdc.Nodes {
 		}
 		*/
 
+		private CounterSet<Node> nodeCounts = new CounterSet<Node>();
+
+		public CounterSet<Node> NodeCounts {
+			get { return nodeCounts; }
+		}
+
 		public DateTime Now = DateTime.Now;
 
 		public Random Rand = new Random();

@@ -224,9 +224,18 @@ namespace xdc.Nodes {
 			get { return typeof(NodeContext); }
 		}
 
+		static public Node Create(Type nodeType, Node parentNode, Dictionary<string, string> atts) {
+			return (Node)Activator.CreateInstance(nodeType, new object[] { parentNode, atts });
+		}
+
 		public virtual NodeContext CreateContext(NodeContext parent) {
 			try {
-				return (NodeContext)Activator.CreateInstance(ContextType, new object[] { parent, this });
+				NodeContext ret = (NodeContext)Activator.CreateInstance(ContextType, new object[] { parent, this });
+
+				if(parent != null && parent.Root != null)
+					parent.Root.NodeCounts.Inc(this);
+
+				return ret;
 			}
 			catch(TargetInvocationException tie) {
 				throw tie.InnerException ?? tie;

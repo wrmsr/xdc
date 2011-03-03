@@ -59,7 +59,12 @@ namespace xdc.Nodes {
 			}
 
 			tw.WriteLine("\telse");
-			tw.WriteLine("\t\traiseerror('omfg');");
+			tw.WriteLine("\tbegin;");
+			tw.WriteLine("\tdeclare @errtxt varchar(50);");
+			tw.WriteLine("\tset @errtxt = 'Unknown object type: ' + cast(@class as varchar(50));");
+			tw.WriteLine();
+			tw.WriteLine("\traiserror(@errtxt, 18, -1);");
+			tw.WriteLine("\tend;");
 
 			tw.WriteLine();
 			tw.WriteLine("\tfetch next from o into @fk, @class;");
@@ -69,6 +74,9 @@ namespace xdc.Nodes {
 			tw.WriteLine("deallocate o;");
 			tw.WriteLine();
 			tw.WriteLine("drop table #objects;");
+			
+			tw.WriteLine();
+			tw.WriteLine("commit transaction;");
 		}
 
 		public void EnterObject(ObjectNode objectNode) {

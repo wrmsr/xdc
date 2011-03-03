@@ -15,6 +15,9 @@ namespace xdc.Nodes {
 	}
 
 	public abstract class Renderer : IRenderer {
+		private CounterSet<ObjectClass> objectClassCounts = new CounterSet<ObjectClass>();
+
+		private const int objectCountReportInterval = 1000;
 		private int objectCount = 0;
 
 		public bool Report = false;
@@ -29,6 +32,8 @@ namespace xdc.Nodes {
 		public abstract void RenderObjectAs(ObjectContext context, ObjectClass objectClass);
 
 		public virtual int Render(ObjectContext context) {
+			objectClassCounts.Inc(context.Node.ObjectClass);
+
 			foreach(ObjectClass objectClass in Enumerations.Reverse(context.ObjectClass.Bases))
 				RenderObjectAs(context, objectClass);
 			
@@ -42,7 +47,7 @@ namespace xdc.Nodes {
 
 			objectCount++;
 
-			if(Report && objectCount % 100 == 0)
+			if(Report && objectCount % objectCountReportInterval == 0)
 				Console.Error.WriteLine("Objects Processed: {0}", objectCount);
 
 			return objectCount;
@@ -61,6 +66,17 @@ namespace xdc.Nodes {
 		}
 
 		public virtual void Dispose() {
+			if(Report) {
+				Console.Error.WriteLine("Object Summary:");
+
+				List<KeyValuePair<ObjectClass, int>> cs = new List<KeyValuePair<ObjectClass,int>>(objectClassCounts);
+				cs.Sort(delegate(KeyValuePair<ObjectClass, int> a, KeyValuePair<ObjectClass, int> b) {
+					return a.Key.Name.CompareTo(b.Key.Name);
+				});
+
+				foreach(KeyValuePair<ObjectClass, int> c in cs)
+					Console.Error.WriteLine("\t{0}: {1}", c.Key.Name, c.Value);
+			}
 
 		}
 	}
@@ -97,8 +113,7 @@ namespace xdc.Nodes {
 		}
 
 		public override void Dispose() {
-			//foreach(IRenderer renderer in renderers)
-			//	renderer.Dispose();
+			base.Dispose();	
 		}
 	}
 
