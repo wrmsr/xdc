@@ -56,7 +56,7 @@ namespace xdc.Nodes {
 			get { return objectClassField; }
 		}
 
-		public FieldNode(Node parent, Dictionary<string, string> atts)
+		public FieldNode(Node parent, Atts atts)
 			: base(parent, atts) {
 			string fieldName = null;
 
@@ -75,7 +75,7 @@ namespace xdc.Nodes {
 
 			string fileValue = null;
 			if(Atts.TryGetValue("FileValue", out fileValue) && !string.IsNullOrEmpty(fileValue))
-				AddChild(new FileValueNode(this, MakeAtts("Value", fileValue)));
+				AddChild(new FileValueNode(this, new Atts("Value", fileValue)));
 
 			string value = null;
 			if(Atts.TryGetValue("Value", out value) && !string.IsNullOrEmpty(value))

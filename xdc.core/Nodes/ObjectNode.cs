@@ -80,7 +80,7 @@ namespace xdc.Nodes {
 			}
 		}
 
-		public ObjectNode(Node parent, Dictionary<string, string> atts)
+		public ObjectNode(Node parent, Atts atts)
 			: base(parent, atts) {
 			string className = null;
 
@@ -106,14 +106,14 @@ namespace xdc.Nodes {
 
 			foreach(ObjectClassField f in Enumerations.Reverse(ObjectClass.Fields)) {
 				if(!string.IsNullOrEmpty(f.Atts["IsOutput"])) { //IsOutput
-					AddChild(new FieldNode(this, Node.MakeAtts("Name", f.FullName)));
+					AddChild(new FieldNode(this, new Atts("Name", f.FullName)));
 					continue;
 				}
 
 				string def = f.Atts["Default"];
 
 				if(!string.IsNullOrEmpty(def)) {
-					FieldNode fn = new FieldNode(this, Node.MakeAtts("Name", f.FullName));
+					FieldNode fn = new FieldNode(this, new Atts("Name", f.FullName));
 					fn.AddChildren(TextTerminalParser.Parse(fn, def));
 					fields.Add(fn);
 
@@ -124,14 +124,8 @@ namespace xdc.Nodes {
 			foreach(KeyValuePair<string, string> att in Atts) {
 				ObjectClassField field = ObjectClass.Fields[att.Key];
 
-				if(field != null) {
-					Dictionary<string, string> childAtts = new Dictionary<string, string>();
-
-					childAtts["Name"] = att.Key;
-					childAtts["Value"] = att.Value;
-
-					fields.Add(new FieldNode(this, childAtts));
-				}
+				if(field != null)
+					fields.Add(new FieldNode(this, new Atts("Name", att.Key, "Value", att.Value)));
 			}
 
 			//TODO: Sort by inheritence:

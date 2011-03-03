@@ -69,14 +69,14 @@ namespace xdc.Nodes {
 		}
 
 		public RootNode()
-			: base(null, new Dictionary<string, string>()) {
+			: base(null, null) {
 		}
 
-		public RootNode(Dictionary<string, string> atts)
+		public RootNode(Atts atts)
 			: base(null, atts) {
 		}
 
-		public RootNode(Node _parent, Dictionary<string, string> atts)
+		public RootNode(Node _parent, Atts atts)
 			: base(null, atts) {
 			if(_parent != null)
 				throw new ArgumentOutOfRangeException("_parent", "RootNode may not have parent");

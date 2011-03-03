@@ -36,6 +36,11 @@ namespace xdc.common {
 			public bool GetBool(string name) {
 				return (this[name] ?? "false").ToLower() == "true";
 			}
+
+			public int GetInt(string name) {
+				string v = this[name];
+				return string.IsNullOrEmpty(v) ? 0 : Convert.ToInt32(v);
+			}
 		}
 
 		public AttributeAccessor Atts {

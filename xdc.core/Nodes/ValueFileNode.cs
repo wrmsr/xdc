@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
+using xdc.common;
 
 namespace xdc.Nodes {
 	public class ValueFileContext : NodeContext {
@@ -36,7 +37,7 @@ namespace xdc.Nodes {
 			get { return typeof(ValueFileContext); }
 		}
 
-		public ValueFileNode(Node parent, Dictionary<string, string> atts)
+		public ValueFileNode(Node parent, Atts atts)
 			: base(parent, atts) {
 			if(!atts.ContainsKey("Name"))
 				throw new ApplicationException("Name required");

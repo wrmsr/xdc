@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using xdc.common;
 
 namespace xdc.Nodes {
 	public class NullContext : TerminalContext {
@@ -18,7 +19,7 @@ namespace xdc.Nodes {
 			get { return typeof(NullContext); }
 		}
 
-		public NullNode(Node parent, Dictionary<string, string> atts)
+		public NullNode(Node parent, Atts atts)
 			: base(parent, atts) {
 		}
 	}

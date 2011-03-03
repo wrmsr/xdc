@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using xdc.common;
 
 namespace xdc.Nodes {
 	public class SetConstContext : NodeContext {
@@ -21,7 +22,7 @@ namespace xdc.Nodes {
 			get { return childTypes; }
 		}
 
-		public SetConstNode(Node parent, Dictionary<string, string> atts)
+		public SetConstNode(Node parent, Atts atts)
 			: base(parent, atts) {
 		}
 	}

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using xdc.common;
 
 namespace xdc.Nodes {
 	public class ForEachContext : NodeContext<ForEachNode> {
@@ -50,7 +51,7 @@ namespace xdc.Nodes {
 			}
 		}
 
-		public ForEachNode(Node parent, Dictionary<string, string> atts)
+		public ForEachNode(Node parent, Atts atts)
 			: base(parent, atts) {
 			if(!Atts.ContainsKey("In"))
 				throw new ApplicationException("Requires In attribute");

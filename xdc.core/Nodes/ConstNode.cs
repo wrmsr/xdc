@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using xdc.common;
 
 namespace xdc.Nodes {
 	public class ConstShared {
@@ -33,7 +34,7 @@ namespace xdc.Nodes {
 			get { return typeof(ConstContext); }
 		}
 
-		public ConstNode(Node parent, Dictionary<string, string> atts)
+		public ConstNode(Node parent, Atts atts)
 			: base(parent, atts) {
 		}
 

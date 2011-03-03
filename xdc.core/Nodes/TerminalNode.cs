@@ -17,7 +17,7 @@ namespace xdc.Nodes {
 			get { return typeof(TerminalContext); }
 		}
 
-		public TerminalNode(Node parent, Dictionary<string, string> atts)
+		public TerminalNode(Node parent, Atts atts)
 			: base(parent, atts) {
 		}
 	}

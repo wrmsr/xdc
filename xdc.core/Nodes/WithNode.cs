@@ -22,7 +22,7 @@ namespace xdc.Nodes {
 			get { return typeof(WithContext); }
 		}
 
-		public WithNode(Node parent, Dictionary<string, string> atts)
+		public WithNode(Node parent, Atts atts)
 			: base(parent, atts) {
 		}
 	}

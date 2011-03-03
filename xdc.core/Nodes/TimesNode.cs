@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using xdc.common;
 
 namespace xdc.Nodes {
 	public class TimesContext : NodeContext<TimesNode> {
@@ -46,7 +47,7 @@ namespace xdc.Nodes {
 			get { return typeof(TimesContext); }
 		}
 
-		public TimesNode(Node parent, Dictionary<string, string> atts)
+		public TimesNode(Node parent, Atts atts)
 			: base(parent, atts) {
 		}
 	}

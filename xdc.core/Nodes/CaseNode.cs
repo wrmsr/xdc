@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using xdc.common;
 
 namespace xdc.Nodes {
 	public class CaseNode : ProxyNode {
@@ -8,7 +9,7 @@ namespace xdc.Nodes {
 			get { return Parent.Parent.ChildTypes; }
 		}
 
-		public CaseNode(Node parent, Dictionary<string, string> atts)
+		public CaseNode(Node parent, Atts atts)
 			: base(parent, atts) {
 		}
 	}

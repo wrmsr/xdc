@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using xdc.common;
 
 namespace xdc.Nodes {
 	public class FileValueShared {
@@ -42,7 +43,7 @@ namespace xdc.Nodes {
 			get { return Atts["Value"]; }
 		}
 
-		public FileValueNode(Node parent, Dictionary<string, string> atts)
+		public FileValueNode(Node parent, Atts atts)
 			: base(parent, atts) {
 		}
 

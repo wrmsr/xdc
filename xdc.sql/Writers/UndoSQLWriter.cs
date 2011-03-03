@@ -5,6 +5,28 @@ using System.Text;
 using xdc.common;
 
 namespace xdc.Nodes {
+	/*
+	2005 only:
+
+	begin transaction;
+	begin try;
+	...
+	commit transaction;
+	end try
+	begin catch;
+		declare @errsev int; set @errsev = error_severity();
+		declare @errnum int; set @errnum = error_number();
+		declare @errmsg nvarchar(4000); set @errmsg = error_message();
+		declare @errst int; set @errst = error_state();
+		if @errst = 0 set @errst = 1;
+		raiserror(@errmsg, @errsev, @errst, @errnum);
+		if xact_state() < 0 rollback transaction;
+	end catch
+	close o;
+	deallocate o;
+	drop table #objects;
+	*/
+
 	public class SQLUndoWriter : IWriter {
 		private TextWriter tw;
 
@@ -60,10 +82,10 @@ namespace xdc.Nodes {
 
 			tw.WriteLine("\telse");
 			tw.WriteLine("\tbegin;");
-			tw.WriteLine("\tdeclare @errtxt varchar(50);");
-			tw.WriteLine("\tset @errtxt = 'Unknown object type: ' + cast(@class as varchar(50));");
+			tw.WriteLine("\t\tdeclare @errtxt varchar(50);");
+			tw.WriteLine("\t\tset @errtxt = 'Unknown object type: ' + cast(@class as varchar(50));");
 			tw.WriteLine();
-			tw.WriteLine("\traiserror(@errtxt, 18, -1);");
+			tw.WriteLine("\t\traiserror(@errtxt, 18, -1);");
 			tw.WriteLine("\tend;");
 
 			tw.WriteLine();

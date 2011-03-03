@@ -5,26 +5,6 @@ using System.Text;
 using xdc.common;
 
 namespace xdc.Nodes {
-	public class AttachedNode : AttachedNode<Node> { }
-	public class AttachedNode<T> where T : Node {
-		private T node = null;
-
-		public AttachedNode(params object[] args) {
-			try {
-				node = Activator.CreateInstance(typeof(T), args) as T;
-			}
-			catch(TargetInvocationException tie) {
-				throw tie.InnerException ?? tie;
-			}
-
-			node.Parent.AddChild(node);
-		}
-
-		public static implicit operator T(AttachedNode<T> a) {
-			return a.node;
-		}
-	}
-
 	public abstract class Node {
 		#region Family
 
@@ -128,19 +108,10 @@ namespace xdc.Nodes {
 
 		#region Atts
 
-		protected Dictionary<string, string> atts = null;
+		protected Atts atts = new Atts();
 
-		public DictionaryAccessor<string, string> Atts {
-			get { return new DictionaryAccessor<string, string>(atts); }
-		}
-
-		static public Dictionary<string, string> MakeAtts(params string[] strs) {
-			Dictionary<string, string> atts = new Dictionary<string, string>();
-
-			for(int i = 1; i < strs.Length; i += 2)
-				atts[strs[i - 1]] = strs[i];
-
-			return atts;
+		public Atts Atts {
+			get { return atts; }
 		}
 
 		public string Name {
@@ -182,9 +153,9 @@ namespace xdc.Nodes {
 
 		#region Ctor
 
-		public Node(Node _parent, Dictionary<string, string> _atts) {
+		public Node(Node _parent, Atts _atts) {
 			parent = _parent;
-			atts = _atts ?? new Dictionary<string, string>();
+			atts.Add(_atts);
 
 			if(_parent != null) {
 
@@ -224,7 +195,7 @@ namespace xdc.Nodes {
 			get { return typeof(NodeContext); }
 		}
 
-		static public Node Create(Type nodeType, Node parentNode, Dictionary<string, string> atts) {
+		static public Node Create(Type nodeType, Node parentNode, Atts atts) {
 			return (Node)Activator.CreateInstance(nodeType, new object[] { parentNode, atts });
 		}
 

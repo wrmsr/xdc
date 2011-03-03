@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
+using xdc.common;
 
 namespace xdc.Nodes {
 	public class DateContext : TerminalContext {
@@ -28,7 +29,7 @@ namespace xdc.Nodes {
 			get { return typeof(DateContext); }
 		}
 
-		public DateNode(Node parent, Dictionary<string, string> atts)
+		public DateNode(Node parent, Atts atts)
 			: base(parent, atts) {
 		}
 	}

@@ -27,14 +27,14 @@ namespace xdc.Nodes {
 		static private IEnumerable<Node> ParseSingle(Node parentNode, string text) {
 			for(Match m = null; (m = terminalRx.Match(text)) != null && m.Success; ) {
 				if(m.Index > 0)
-					yield return new TextNode(parentNode, Node.MakeAtts("Value", text.Substring(0, m.Index)));
+					yield return new TextNode(parentNode, new Atts("Value", text.Substring(0, m.Index)));
 
 				if(m.Groups["const"].Success)
-					yield return new ConstNode(parentNode, Node.MakeAtts("Name", m.Groups["const"].Value));
+					yield return new ConstNode(parentNode, new Atts("Name", m.Groups["const"].Value));
 				else if(m.Groups["fileval"].Success)
-					yield return  new FileValueNode(parentNode, Node.MakeAtts("Name", m.Groups["fileval"].Value));
+					yield return  new FileValueNode(parentNode, new Atts("Name", m.Groups["fileval"].Value));
 				else if(m.Groups["ref"].Success)
-					yield return new RefNode(parentNode, Node.MakeAtts("Value", m.Groups["ref"].Value));
+					yield return new RefNode(parentNode, new Atts("Value", m.Groups["ref"].Value));
 
 				text = text.Substring(m.Index + m.Length);
 			}
@@ -42,7 +42,7 @@ namespace xdc.Nodes {
 			text = escapeRx.Replace(text, "${a}${b}");
 
 			if(!string.IsNullOrEmpty(text))
-				yield return new TextNode(parentNode, Node.MakeAtts("Value", text));
+				yield return new TextNode(parentNode, new Atts("Value", text));
 		}
 
 		static private IEnumerable<Node> ParseTries(Node parentNode, string text) {
@@ -71,7 +71,7 @@ namespace xdc.Nodes {
 				return ParseTries(parentNode, text);
 
 			ChanceNode chanceNode = new ChanceNode(parentNode, 
-				Node.MakeAtts("Type", "Even"));
+				new Atts("Type", "Even"));
 
 			foreach(string cur in chances) {
 				CaseNode caseNode = new CaseNode(chanceNode, null);

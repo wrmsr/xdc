@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using xdc.common;
 
 namespace xdc.Nodes {
 	public class ChanceContext : NodeContext {
@@ -45,7 +46,7 @@ namespace xdc.Nodes {
 			get { return childTypes; }
 		}
 
-		public ChanceNode(Node parent, Dictionary<string, string> atts)
+		public ChanceNode(Node parent, Atts atts)
 			: base(parent, atts) {
 		}
 	}

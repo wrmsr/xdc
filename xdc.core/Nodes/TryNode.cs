@@ -48,7 +48,7 @@ namespace xdc.Nodes {
 			get { return childTypes; }
 		}
 
-		public TryNode(Node parent, Dictionary<string, string> atts)
+		public TryNode(Node parent, Atts atts)
 			: base(parent, atts) {
 		}
 	}

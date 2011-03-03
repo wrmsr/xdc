@@ -20,7 +20,7 @@ namespace xdc.Nodes {
 		private SqlConnection conn = null;
 		private IWriter writer = null;
 
-		private const int bufSize = 0x40000;
+		private const int bufSize = 0x80000;
 		private const int execInterval = bufSize - 0x1000;
 		private StringBuilder sb = new StringBuilder(bufSize);
 

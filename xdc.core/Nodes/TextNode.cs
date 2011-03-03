@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using xdc.common;
 
 namespace xdc.Nodes {
 	public class TextContext : TerminalContext {
@@ -25,7 +26,7 @@ namespace xdc.Nodes {
 			get { return Atts["Value"]; }
 		}
 
-		public TextNode(Node parent, Dictionary<string, string> atts)
+		public TextNode(Node parent, Atts atts)
 			: base(parent, atts) {
 			if(!Atts.ContainsKey("Value"))
 				throw new ApplicationException("TextNode must have value");

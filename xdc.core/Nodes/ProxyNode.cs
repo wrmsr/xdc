@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using xdc.common;
 
 namespace xdc.Nodes {
 	//PassThrough node but NOT a MetaNode
@@ -10,7 +11,7 @@ namespace xdc.Nodes {
 			get { return Parent.ChildTypes; }
 		}
 
-		public ProxyNode(Node parent, Dictionary<string, string> atts)
+		public ProxyNode(Node parent, Atts atts)
 			: base(parent, atts) {
 		}
 	}
