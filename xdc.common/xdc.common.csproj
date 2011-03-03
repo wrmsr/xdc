@@ -37,6 +37,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Atts.cs" />
     <Compile Include="DataStructures\CounterSet.cs" />
     <Compile Include="DataStructures\DictionaryAccessor.cs" />
     <Compile Include="DataStructures\ListAccessor.cs" />

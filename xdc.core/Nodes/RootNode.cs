@@ -14,6 +14,10 @@ namespace xdc.Nodes {
 		}
 		*/
 
+		public DateTime Now = DateTime.Now;
+
+		public Random Rand = new Random();
+
 		public object GetShared(Type sharedType) {
 			if(sharedType == null)
 				return null;

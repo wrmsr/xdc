@@ -4,19 +4,13 @@ using System.Text;
 using System.Xml;
 
 namespace xdc.Nodes {
-	public class XMLObjectWriter : IObjectWriter {
+	public class XMLWriter : IWriter {
 		private XmlWriter xw;
 
-		public XMLObjectWriter(XmlWriter _xw) {
+		public XMLWriter(XmlWriter _xw) {
 			xw = _xw;
-		}
 
-		public void WriteStart() {
 			xw.WriteStartElement("Objects");
-		}
-
-		public void WriteEnd() {
-			xw.WriteEndElement();
 		}
 
 		public void EnterObject(ObjectNode objectNode) {
@@ -30,7 +24,13 @@ namespace xdc.Nodes {
 		}
 
 		public void WriteField(FieldNode fieldNode, string value) {
-			xw.WriteElementString(fieldNode.ObjectClassField.Name, value);
+			if(fieldNode.ObjectClassField.Parent.Atts.GetBool("Write") && fieldNode.ObjectClassField.Atts.GetBool("Write"))
+				xw.WriteElementString(fieldNode.ObjectClassField.Name, value);
+		}
+
+		public void Dispose() {
+			if(xw.WriteState != WriteState.Closed && xw.WriteState != WriteState.Error)
+				xw.WriteEndElement();			
 		}
 	}
 }

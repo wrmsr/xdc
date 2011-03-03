@@ -31,6 +31,8 @@ namespace xdc.Nodes {
 			dict.Add("FileValue", typeof(FileValueNode));
 			dict.Add("Null", typeof(NullNode));
 			dict.Add("ForEach", typeof(ForEachNode));
+			dict.Add("With", typeof(WithNode));
+			dict.Add("Date", typeof(DateNode));
 
 			return dict;
 		}

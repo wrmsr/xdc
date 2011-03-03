@@ -3,31 +3,31 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace xdc.common {
-	public class CounterSet {
-		private Dictionary<string, int> dct = new Dictionary<string, int>();
+	public class CounterSet<K> {
+		private Dictionary<K, int> dct = new Dictionary<K, int>();
 
 		public CounterSet() {
 		
 		}
 
-		public int this[string name] {
+		public int this[K key] {
 			get {
 				int count;
-				if(dct.TryGetValue(name, out count))
+				if(dct.TryGetValue(key, out count))
 					return count;
 				return 0;
 			}
 			set {
-				dct[name] = value;
+				dct[key] = value;
 			}
 		}
 
-		public int Inc(string name) {
-			return (this[name] = this[name] + 1);
+		public int Inc(K key) {
+			return (this[key] = this[key] + 1);
 		}
 
-		public int Dec(string name) {
-			return (this[name] = this[name] - 1);
+		public int Dec(K key) {
+			return (this[key] = this[key] - 1);
 		}
 
 		public void Clear() {

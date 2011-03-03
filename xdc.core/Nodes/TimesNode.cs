@@ -16,7 +16,7 @@ namespace xdc.Nodes {
 
 				if(Node.Atts.ContainsKey("Rand")) {
 					string[] randParts = Node.Atts["Rand"].Split('-');
-					to = (new Random()).Next(Convert.ToInt32(randParts[0]), Convert.ToInt32(randParts[1]) + 1);
+					to = Root.Rand.Next(Convert.ToInt32(randParts[0]), Convert.ToInt32(randParts[1]) + 1);
 				}
 				else if(Node.Atts.ContainsKey("To"))
 					to = Convert.ToInt32(Node.Atts["To"]);

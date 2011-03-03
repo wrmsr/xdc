@@ -4,11 +4,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{EFC09C29-B611-4357-BFCB-D398BD906FBA}</ProjectGuid>
+    <ProjectGuid>{68304634-B60B-4FF7-8337-378DD9E49743}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>xdc.core</RootNamespace>
-    <AssemblyName>xdc.core</AssemblyName>
+    <RootNamespace>xdc.sql</RootNamespace>
+    <AssemblyName>xdc.sql</AssemblyName>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
@@ -37,48 +37,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Nodes\CaseNode.cs" />
-    <Compile Include="Nodes\ChanceNode.cs" />
-    <Compile Include="Nodes\ConstNode.cs" />
-    <Compile Include="Nodes\DateNode.cs" />
-    <Compile Include="Nodes\FieldNode.cs" />
-    <Compile Include="Nodes\FileValueNode.cs" />
-    <Compile Include="Nodes\ForEachNode.cs" />
-    <Compile Include="Nodes\MetaNode.cs" />
-    <Compile Include="Nodes\Node.cs" />
-    <Compile Include="Nodes\NodeContext.cs" />
-    <Compile Include="Nodes\NodeTypes.cs" />
-    <Compile Include="Nodes\NodeValue.cs" />
-    <Compile Include="Nodes\NullNode.cs" />
-    <Compile Include="Nodes\ObjectNode.cs" />
-    <Compile Include="Nodes\ProxyNode.cs" />
-    <Compile Include="Nodes\RefNode.cs" />
-    <Compile Include="Nodes\RootNode.cs" />
-    <Compile Include="Nodes\SetConstNode.cs" />
-    <Compile Include="Nodes\TemplateNode.cs" />
-    <Compile Include="Nodes\TerminalNode.cs" />
-    <Compile Include="Nodes\TextNode.cs" />
-    <Compile Include="Nodes\TimesNode.cs" />
-    <Compile Include="Nodes\TryNode.cs" />
-    <Compile Include="Nodes\ValueFileNode.cs" />
-    <Compile Include="Nodes\ValueFiles.cs" />
-    <Compile Include="Nodes\WithNode.cs" />
-    <Compile Include="Parsers\TextTerminalParser.cs" />
-    <Compile Include="Parsers\XMLNodeParser.cs" />
+    <Compile Include="SQLRenderTarget\ExecSQLRenderTarget.cs" />
+    <Compile Include="Renderers\SQLRenderer.cs" />
+    <Compile Include="SQLRenderTarget\SQLRenderTarget.cs" />
+    <Compile Include="SQLRenderTarget\TextSQLRenderTarget.cs" />
+    <Compile Include="Writers\UndoSQLWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Renderers\Renderer.cs" />
-    <Compile Include="Renderers\XMLRenderer.cs" />
-    <Compile Include="Writers\XMLWriter.cs" />
-    <Compile Include="Writers\Writer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\xdc.common\xdc.common.csproj">
       <Project>{339BE148-A15C-4637-BADC-07D9BBC4A1E4}</Project>
       <Name>xdc.common</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Nodes.cd" />
+    <ProjectReference Include="..\xdc.core\xdc.core.csproj">
+      <Project>{EFC09C29-B611-4357-BFCB-D398BD906FBA}</Project>
+      <Name>xdc.core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

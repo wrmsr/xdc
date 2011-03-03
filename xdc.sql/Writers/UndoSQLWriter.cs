@@ -5,13 +5,19 @@ using System.Text;
 using xdc.common;
 
 namespace xdc.Nodes {
-	public class SQLUndoObjectWriter : IObjectWriter {
+	public class SQLUndoWriter : IWriter {
 		private TextWriter tw;
 
 		private Set<ObjectClassField> idFields = new Set<ObjectClassField>();
 
-		public SQLUndoObjectWriter(TextWriter _tw) {
+		public SQLUndoWriter(TextWriter _tw) {
 			tw = _tw;
+
+			WriteStart();
+		}
+
+		public void Dispose() {
+			WriteEnd();
 		}
 
 		public void WriteStart() {

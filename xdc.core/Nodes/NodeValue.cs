@@ -51,6 +51,16 @@ namespace xdc.Nodes {
 			return new CompoundNodeValue(Enumerations.Combine(Terminals, other.Terminals));
 		}
 
+		public override string ToString() {
+			return GetType().Name +
+				(string.IsNullOrEmpty(Display) ? string.Empty :
+					": " + Display);
+		}
+
+		public virtual string Display {
+			get { return null; }
+		}
+
 		static public NodeValue Concat(NodeValue a, NodeValue b) {
 			return
 				a == null ? b :
@@ -90,8 +100,8 @@ namespace xdc.Nodes {
 				return base.Concat(other);
 		}
 
-		public override string ToString() {
-			return string.Format("StaticNodeValue: {0}", Value);
+		public override string Display {
+			get { return Value; }
 		}
 	}
 
@@ -106,16 +116,12 @@ namespace xdc.Nodes {
 			context = _context;
 		}
 
-		public override string ToString() {
-			return string.Format("DynamicNodeValue: {0}", Context.Name);
+		public override string Display {
+			get { return Context.Name; }
 		}
 	}
 
 	public class NullNodeValue : TerminalNodeValue {
-		public override string ToString() {
-			return "NullNodeValue";
-		}
-
 		public override NodeValue Concat(NodeValue other) {
 			return this;
 		}
