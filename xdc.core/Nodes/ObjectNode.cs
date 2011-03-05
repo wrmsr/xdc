@@ -99,7 +99,7 @@ namespace xdc.Nodes {
 					if(cur.TopClassName == TopClassName)
 						c++;
 
-				atts["Name"] = TopClassName + Convert.ToString(c);
+				Atts["Name"] = TopClassName + Convert.ToString(c);
 			}
 
 			List<FieldNode> fields = new List<FieldNode>();

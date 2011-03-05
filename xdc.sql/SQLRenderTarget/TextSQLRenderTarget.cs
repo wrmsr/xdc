@@ -13,12 +13,6 @@ namespace xdc.Nodes {
 
 		private TextWriter dst = null;
 
-		private bool silent = false;
-
-		public bool Silent {
-			get { return silent; }
-		}
-
 		public TextWriter Dst {
 			get { return dst; }
 		}
@@ -29,29 +23,10 @@ namespace xdc.Nodes {
 
 		public TextSQLRenderTarget(TextWriter _dst) {
 			dst = _dst;
-
-			WriteStart();
-		}
-
-		public TextSQLRenderTarget(TextWriter _dst, bool _silent) {
-			dst = _dst;
-			silent = _silent;
-
-			WriteStart();
 		}
 
 		public override void Dispose() {
-			WriteEnd();
-		}
-
-		private void WriteStart() {
-			if(!Silent)
-				Emit("print '<Objects>';" + Environment.NewLine);
-		}
-
-		private void WriteEnd() {
-			if(!Silent)
-				Emit("print '</Objects>';");
+			Flush();
 		}
 
 		public override bool DeclareVar(string name, string type) {
@@ -88,27 +63,13 @@ namespace xdc.Nodes {
 			dst.Flush();
 		}
 
-		private int objectCount = 0;
-
 		public override void EnterObject(ObjectNode objectNode) {
-			if(!Silent) {
-				if(++objectCount % 100 == 0)
-					Emit(string.Format("print '#{0}';" + Environment.NewLine, objectCount));
-
-				if(objectNode.ObjectClass.Atts.GetBool("Write"))
-					Emit(string.Format("print '<{0}>';" + Environment.NewLine, objectNode.ObjectClass.Name));
-			}
 		}
 
 		public override void LeaveObject(ObjectNode objectNode) {
-			if(!Silent)
-				if(objectNode.ObjectClass.Atts.GetBool("Write"))
-					Emit(string.Format("print '</{0}>';" + Environment.NewLine, objectNode.ObjectClass.Name));
 		}
 
 		public override void WriteFieldSQL(FieldNode fieldNode, string sql) {
-			if(!Silent)
-				Emit(string.Format("print '<{0}>' + {1} + '</{0}>';" + Environment.NewLine, fieldNode.ObjectClassField.Name, sql));
 		}
 	}
 }

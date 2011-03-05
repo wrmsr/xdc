@@ -28,6 +28,8 @@ namespace xdc.Nodes {
 	*/
 
 	public class SQLUndoWriter : IWriter {
+		private bool escape = false;
+
 		private TextWriter tw;
 
 		private Set<ObjectClassField> idFields = new Set<ObjectClassField>();
@@ -38,67 +40,89 @@ namespace xdc.Nodes {
 			WriteStart();
 		}
 
+		public SQLUndoWriter(TextWriter _tw, bool _escape) {
+			tw = _tw;
+			escape = _escape;
+
+			WriteStart();
+		}
+
 		public void Dispose() {
 			WriteEnd();
 		}
 
-		public void WriteStart() {
-			tw.WriteLine("begin transaction;");
-			tw.WriteLine();
+		private void Emit() {
+			Emit(string.Empty);
+		}
 
-			tw.WriteLine("create table #objects (pk int identity(1, 1) primary key, fk int not null, class varchar(50));");
-			tw.WriteLine();
+		private void Emit(string str) {
+			if(escape)
+				str = str.Replace("'", "''");
+
+			tw.WriteLine(str);
+		}
+
+		public void WriteStart() {
+			Emit("begin transaction;");
+			Emit();
+
+			Emit("create table #objects (pk int identity(1, 1) primary key, fk int not null, class varchar(50));");
+			Emit();
 		}
 
 		public void WriteEnd() {
-			tw.WriteLine();
+			Emit();
 
-			tw.WriteLine("declare @fk int;");
-			tw.WriteLine("declare @class varchar(50);");
-			tw.WriteLine();
-			tw.WriteLine("declare o cursor for select fk, class from #objects order by pk desc;");
-			tw.WriteLine("open o;");
-			tw.WriteLine();
-			tw.WriteLine("fetch next from o into @fk, @class;");
-			tw.WriteLine("while @@fetch_status = 0");
-			tw.WriteLine("begin;");
-			tw.WriteLine("\tprint @class + ': ' + cast(@fk as varchar(50));");
-			tw.WriteLine();
+			Emit("declare @fk int;");
+			Emit("declare @class varchar(50);");
+			Emit();
+			Emit("declare o cursor for select fk, class from #objects order by pk desc;");
+			Emit("open o;");
+			Emit();
+			Emit("fetch next from o into @fk, @class;");
+			Emit("while @@fetch_status = 0");
+			Emit("begin;");
+			Emit("\tprint @class + ': ' + cast(@fk as varchar(50));");
+			Emit();
 
 			int i = 0;
 			foreach(ObjectClassField id in idFields) {
-				tw.Write("\t");
+				StringBuilder sb = new StringBuilder();
+
+				sb.Append("\t");
 
 				if(i++ > 0)
-					tw.Write("else ");
+					sb.Append("else ");
 
-				tw.WriteLine("if @class = '{0}'",
+				sb.AppendFormat("if @class = '{0}'" + Environment.NewLine,
 					id.Parent.Name);
 
-				tw.WriteLine("\t\tdelete from {0} where {1} = @fk;",
+				sb.AppendFormat("\t\tdelete from {0} where {1} = @fk;" + Environment.NewLine,
 					id.Parent.Atts["Table"],
 					id.Atts["Column"]);
+
+				Emit(sb.ToString());
 			}
 
-			tw.WriteLine("\telse");
-			tw.WriteLine("\tbegin;");
-			tw.WriteLine("\t\tdeclare @errtxt varchar(50);");
-			tw.WriteLine("\t\tset @errtxt = 'Unknown object type: ' + cast(@class as varchar(50));");
-			tw.WriteLine();
-			tw.WriteLine("\t\traiserror(@errtxt, 18, -1);");
-			tw.WriteLine("\tend;");
+			Emit("\telse");
+			Emit("\tbegin;");
+			Emit("\t\tdeclare @errtxt varchar(50);");
+			Emit("\t\tset @errtxt = 'Unknown object type: ' + cast(@class as varchar(50));");
+			Emit();
+			Emit("\t\traiserror(@errtxt, 18, -1);");
+			Emit("\tend;");
 
-			tw.WriteLine();
-			tw.WriteLine("\tfetch next from o into @fk, @class;");
-			tw.WriteLine("end;");
-			tw.WriteLine();
-			tw.WriteLine("close o;");
-			tw.WriteLine("deallocate o;");
-			tw.WriteLine();
-			tw.WriteLine("drop table #objects;");
-			
-			tw.WriteLine();
-			tw.WriteLine("commit transaction;");
+			Emit();
+			Emit("\tfetch next from o into @fk, @class;");
+			Emit("end;");
+			Emit();
+			Emit("close o;");
+			Emit("deallocate o;");
+			Emit();
+			Emit("drop table #objects;");
+
+			Emit();
+			Emit("commit transaction;");
 		}
 
 		public void EnterObject(ObjectNode objectNode) {
@@ -109,16 +133,22 @@ namespace xdc.Nodes {
 			
 		}
 
+		public void WriteIDField(FieldNode fieldNode, string valueSQL) {
+			string fmt = "insert into #objects(fk, class) values ({0}, '{1}');";
+
+			if(escape)
+				fmt = fmt.Replace("'", "''");
+
+			tw.WriteLine(fmt, valueSQL, fieldNode.ObjectClassField.Parent.Name);
+
+			idFields.TryAdd(fieldNode.ObjectClassField);
+		}
+
 		public void WriteField(FieldNode fieldNode, string value) {
 			if(fieldNode.ObjectClassField.Atts.GetBool("IsID")
 				&& !string.IsNullOrEmpty(fieldNode.ObjectClassField.Atts["Column"])
-				&& !string.IsNullOrEmpty(fieldNode.ObjectClassField.Parent.Atts["Table"])) {
-				tw.WriteLine("insert into #objects(fk, class) values ({0}, '{1}');",
-					Convert.ToInt32(value),
-					fieldNode.ObjectClassField.Parent.Name);
-
-				idFields.TryAdd(fieldNode.ObjectClassField);
-			}
+				&& !string.IsNullOrEmpty(fieldNode.ObjectClassField.Parent.Atts["Table"]))
+				WriteIDField(fieldNode, Convert.ToString(Convert.ToInt32(value)));
 		}
 	}
 }

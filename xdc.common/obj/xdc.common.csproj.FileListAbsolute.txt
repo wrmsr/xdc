@@ -1,0 +1,5 @@
+C:\BBDC\bbdc\xdc.common\bin\Debug\xdc.common.dll
+C:\BBDC\bbdc\xdc.common\bin\Debug\xdc.common.pdb
+C:\BBDC\bbdc\xdc.common\obj\Debug\ResolveAssemblyReference.cache
+C:\BBDC\bbdc\xdc.common\obj\Debug\xdc.common.dll
+C:\BBDC\bbdc\xdc.common\obj\Debug\xdc.common.pdb

@@ -1,0 +1,9 @@
+C:\BBDC\bbdc\xdc.sql\bin\Debug\xdc.sql.dll
+C:\BBDC\bbdc\xdc.sql\bin\Debug\xdc.sql.pdb
+C:\BBDC\bbdc\xdc.sql\bin\Debug\xdc.common.dll
+C:\BBDC\bbdc\xdc.sql\bin\Debug\xdc.core.dll
+C:\BBDC\bbdc\xdc.sql\bin\Debug\xdc.common.pdb
+C:\BBDC\bbdc\xdc.sql\bin\Debug\xdc.core.pdb
+C:\BBDC\bbdc\xdc.sql\obj\Debug\ResolveAssemblyReference.cache
+C:\BBDC\bbdc\xdc.sql\obj\Debug\xdc.sql.dll
+C:\BBDC\bbdc\xdc.sql\obj\Debug\xdc.sql.pdb

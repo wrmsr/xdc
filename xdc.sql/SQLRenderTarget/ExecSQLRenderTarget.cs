@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using xdc.common;
 
 namespace xdc.Nodes {
@@ -13,6 +14,7 @@ namespace xdc.Nodes {
 			public string DataType = null;
 			public object Value = null;
 			public bool IsSet = false;
+			public bool IsDeclared = false;
 		}
 
 		private Dictionary<string, Var> declaredVars = new Dictionary<string, Var>();
@@ -20,55 +22,48 @@ namespace xdc.Nodes {
 		private SqlConnection conn = null;
 		private IWriter writer = null;
 
-		private const int bufSize = 0x80000;
+		private const int bufSize = 0x40000;
 		private const int execInterval = bufSize - 0x1000;
-		private StringBuilder sb = new StringBuilder(bufSize);
-
-		private StringWriter sw = null;
-		private TextSQLRenderTarget txt = null;
+		private StringBuilder buf = new StringBuilder(bufSize);
 
 		private List<SqlError> errors = new List<SqlError>();
 
+		private bool progBar = false;
+
 		public SqlConnection Conn {
 			get { return conn; }
-		}
-
-		protected TextSQLRenderTarget Txt {
-			get {
-				if(txt == null) {
-					sb.Length = 0;
-
-					sw = new StringWriter(sb);
-					txt = new TextSQLRenderTarget(sw, true);
-
-					EmitPrefix();
-				}
-
-				return txt;
-			}
 		}
 
 		public override IWriter Writer {
 			get { return writer; }
 		}
 
-		public ExecSQLRenderTarget(SqlConnection _conn, IWriter _writer) {
+		public ExecSQLRenderTarget(SqlConnection _conn, IWriter _writer, bool _progBar) {
 			conn = _conn;
 			writer = _writer;
+			progBar = _progBar;
 		}
 
 		public override void Dispose() {
-			Txt.Flush();
-
 			Exec();
+		}
+
+		private void RawDeclareVar(string name, string type) {
+			buf.AppendLine(string.Format("declare @{0} {1};" + Environment.NewLine, name, type));
+		}
+
+		private void RawSetVar(string name, string value) {
+			buf.AppendLine(string.Format("set @{0} = {1};" + Environment.NewLine, name, value));
 		}
 
 		protected void EmitPrefix() {
 			foreach(KeyValuePair<string, Var> cur in declaredVars) {
-				Txt.DeclareVar(cur.Key, cur.Value.DataType);
+				RawDeclareVar(cur.Key, cur.Value.DataType);
 
 				if(cur.Value.Value != null)
-					Txt.SetVar(cur.Key, SQLRenderer.DataTypeToStr(cur.Value.Value, cur.Value.DataType));
+					RawSetVar(cur.Key, SQLRenderer.DataTypeToStr(cur.Value.Value, cur.Value.DataType));
+
+				cur.Value.IsDeclared = true;
 			}
 		}
 
@@ -95,20 +90,27 @@ namespace xdc.Nodes {
 		}
 
 		public override bool DeclareVar(string name, string type) {
-			Txt.DeclareVar(name, type);
+			Var var = null;
 
-			Var existingVar = null;
-
-			if(declaredVars.TryGetValue(name, out existingVar)) {
-				if(existingVar.DataType.ToLower() != type.ToLower())
+			if(declaredVars.TryGetValue(name, out var)) {
+				if(var.DataType.ToLower() != type.ToLower())
 					throw new ApplicationException("Variable already declared with different type: " + name);
+
+				if(!var.IsDeclared) {
+					RawDeclareVar(name, type);
+
+					var.IsDeclared = true;
+				}
 
 				return true;
 			}
 
-			Var var = new Var();
+			RawDeclareVar(name, type);
+
+			var = new Var();
 			var.DataType = type;
 			var.IsSet = true;
+			var.IsDeclared = true;
 
 			declaredVars[name] = var;
 
@@ -116,58 +118,87 @@ namespace xdc.Nodes {
 		}
 
 		public override void SetVar(string name, string value) {
-			Txt.SetVar(name, value);
+			RawSetVar(name, value);
 
-			Var existingVar = null;
+			Var var = null;
 
-			if(!declaredVars.TryGetValue(name, out existingVar))
+			if(!declaredVars.TryGetValue(name, out var))
 				throw new ApplicationException("Variable not found: " + name);
 
-			existingVar.IsSet = true;
+			var.IsSet = true;
 		}
 
 		public override void Emit(string sql) {
-			Txt.Emit(sql);
+			if(buf.Length == 0)
+				EmitPrefix();
+
+			buf.AppendLine(sql);
+		}
+
+		private void ThrowSQLError(int errNum, int errLineNum, string errMsg) {
+			errMsg = Regex.Replace(errMsg, @"^[\+\-\=][^\n]*(\n|$)", string.Empty, RegexOptions.Multiline);
+
+			throw new ApplicationException(string.Format(
+				"SQLError: #{0} @{1}: {2}", errNum, errLineNum, errMsg));
 		}
 
 		private Queue<Node> writeQueue = new Queue<Node>();
 
+		private int writeCount = 0;
+
+		private int lastWriteReport = 0;
+
 		public void Exec() {
 			EmitSuffix();
-			Txt.Flush();
-			sw.Flush();
 
-			Console.Error.WriteLine("Executing SQL Buffer: {0} Bytes, {1} Writes Queued", sb.Length, writeQueue.Count);
+			Console.Error.WriteLine("Executing SQL Buffer: {0} Bytes, {1} Writes Queued", buf.Length, writeQueue.Count);
 
 			SqlInfoMessageEventHandler infoMessage = new SqlInfoMessageEventHandler(conn_InfoMessage);
 
+			writeCount = writeQueue.Count;
+
+			if(progBar)
+				TextUtils.DrawTextProgressBar(0, writeQueue.Count);
+
+			lastWriteReport = 0;
+
 			conn.InfoMessage += infoMessage;
 			try {
-				using(SqlCommand cmd = new SqlCommand(sb.ToString(), conn))
-				using(SqlDataReader reader = cmd.ExecuteReader())
-				if(reader.Read())
-				for(int i = 0; i < reader.FieldCount; i++) {
-					Var var = null;
+				using(SqlCommand cmd = new SqlCommand(buf.ToString(), conn)) {
+					cmd.CommandTimeout = 12 * 60 * 60;
 
-					if(declaredVars.TryGetValue(reader.GetName(i), out var))
-						var.Value = reader.GetValue(i);
+					using(SqlDataReader reader = cmd.ExecuteReader())
+					if(reader.Read())
+						for(int i = 0; i < reader.FieldCount; i++) {
+							Var var = null;
+
+							if(declaredVars.TryGetValue(reader.GetName(i), out var))
+								var.Value = reader.GetValue(i);
+						}
 				}
+			}
+			catch(SqlException ex) {
+				ThrowSQLError(ex.Number, ex.LineNumber, ex.Message);
 			}
 			finally {
 				conn.InfoMessage -= infoMessage;
+
+				if(progBar)
+					TextUtils.ClearLine();
 			}
 
-			if(errors.Count > 0) {
-				SqlError err = errors[0];
-
-				throw new ApplicationException(string.Format(
-					"SQLError: #{0} @{1}: {2}", err.Number, err.LineNumber, err.Message));
-			}
+			if(errors.Count > 0)
+				ThrowSQLError(errors[0].Number, errors[0].LineNumber, errors[0].Message);
 
 			if(writeQueue.Count != 0)
 				throw new ApplicationException("WriteStack mismatch, items left: " + writeQueue.Count);
 
-			txt = null;
+			writeCount = 0;
+
+			foreach(Var var in declaredVars.Values)
+				var.IsDeclared = false;
+
+			buf.Length = 0;
 		}
 
 		void conn_InfoMessage(object sender, SqlInfoMessageEventArgs e) {
@@ -181,12 +212,19 @@ namespace xdc.Nodes {
 				else
 					errors.Add(err);
 			}
+
+			int writesDone = writeCount - writeQueue.Count;
+
+			if(writesDone - lastWriteReport > 100) {
+				lastWriteReport = writesDone;
+
+				if(progBar)
+					TextUtils.DrawTextProgressBar(writesDone, writeCount);
+			}
 		}
 
 		public override void Flush() {
-			Txt.Flush();
-
-			if(sb.Length > execInterval)
+			if(buf.Length > execInterval)
 				Exec();
 		}
 
@@ -201,7 +239,11 @@ namespace xdc.Nodes {
 		}
 
 		public override void WriteFieldSQL(FieldNode fieldNode, string sql) {
+			if(sql.ToLower() == "null")
+				throw new ApplicationException("Cannot output NULL field value");
+
 			writeQueue.Enqueue(fieldNode);
+
 			Emit(string.Format("print '=' + {0};" + Environment.NewLine, sql));
 		}
 	}

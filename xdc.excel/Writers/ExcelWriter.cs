@@ -1,125 +1,180 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using xdc.common;
 
 namespace xdc.Nodes {
 	public class ExcelWriter : IWriter, IDisposable {
+		private object sync = new object();
+
 		private string fileName = null;
 
-		private ADODB.Connection conn = null;
-
-		private bool tableCreated = false;
+		//http://stackoverflow.com/questions/158706/how-to-properly-clean-up-excel-interop-objects-in-c
+		private Microsoft.Office.Interop.Excel.Application app;
+		private Microsoft.Office.Interop.Excel.Workbooks wbs;
+		private Microsoft.Office.Interop.Excel.Workbook wb;
+		private Microsoft.Office.Interop.Excel.Sheets wss;
+		private Microsoft.Office.Interop.Excel.Worksheet ws;
 
 		private CounterSet<string> colNameCounts = new CounterSet<string>();
 
-		private Dictionary<FieldNode, string> colNames = new Dictionary<FieldNode, string>();
+		private Dictionary<FieldNode, int> colIdxs = new Dictionary<FieldNode, int>();
 
-		private Stack<Dictionary<string, string>> vals = new Stack<Dictionary<string, string>>();
+		private Stack<Dictionary<int, string>> vals = new Stack<Dictionary<int, string>>();
 
-		private StreamWriter sw = null; //new StreamWriter("excel.sql");
-
-		public string FileName {
-			get { return fileName; }
+		public string FilePath {
+			get {
+				FileInfo fi = new FileInfo(fileName);
+				
+				return fi.FullName;
+			}
 		}
 
 		public ExcelWriter(string _fileName) {
 			fileName = _fileName;
 
-			File.Delete(fileName);
+			if(File.Exists(FilePath))
+				throw new ApplicationException("File already exists: " + FilePath);
 
-            string connStr = string.Format(
-                "Driver={{Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)}}; DBQ={0}; ReadOnly=False;",
-                FileName);
+			File.Create(FilePath);
 
-			conn = new ADODB.Connection();
-			conn.Open(connStr, null, null, 0);
+			app = new Microsoft.Office.Interop.Excel.Application();
 
-			if(conn.State != 1)
-				throw new ApplicationException("Could not connect to Excel Driver: " + FileName);
+			Console.Error.WriteLine("Connected to Excel");
 
-			Console.Error.WriteLine("Connected to Excel Driver: " + FileName);
-		}
+			wbs = app.Workbooks;
 
-		private void Exec(string txt) {
-			//sw.WriteLine(txt);
+			wb = wbs.Add(1);
 
-			object ra;
-			conn.Execute(txt, out ra, 0);
+			wb.Activate();
+
+			wss = wb.Sheets;
+
+			ws = (Microsoft.Office.Interop.Excel.Worksheet)wss.get_Item(1);
+
+			Console.Error.WriteLine("Excel Worksheet Initialized");
 		}
 
 		public void EnterObject(ObjectNode objectNode) {
-			vals.Push(new Dictionary<string, string>());
+			vals.Push(new Dictionary<int, string>());
 		}
 
 		public void LeaveObject(ObjectNode objectNode) {
-			List<KeyValuePair<string, string>> objVals = new List<KeyValuePair<string, string>>();
+			List<KeyValuePair<int, string>> objVals = new List<KeyValuePair<int, string>>();
 
-			foreach(Dictionary<string, string> o in vals)
+			foreach(Dictionary<int, string> o in vals)
 				objVals.AddRange(o);
 
 			vals.Pop();
 
 			if(objVals.Count > 0) {
-				StringBuilder sb = new StringBuilder();
+				lock(sync) {
+					/*
+					StringBuilder sb = new StringBuilder();
 
-				sb.Append("insert into [t$] (");
+					sb.Append("insert into [t$] (");
 
-				int i = 0;
-				foreach(KeyValuePair<string, string> val in objVals) {
-					if(i++ > 0)
-						sb.Append(", ");
+					int i = 0;
+					foreach(KeyValuePair<string, string> val in objVals) {
+						if(i++ > 0)
+							sb.Append(", ");
 
-					sb.Append(val.Key);
+						sb.Append(val.Key);
+					}
+
+					sb.Append(") values (");
+
+					i = 0;
+					foreach(KeyValuePair<string, string> val in objVals) {
+						if(i++ > 0)
+							sb.Append(", ");
+
+						sb.AppendFormat("'{0}'", val.Value);
+					}
+
+					sb.Append(");");
+
+					Exec(sb.ToString());
+					*/
 				}
-
-				sb.Append(") values (");
-
-				i = 0;
-				foreach(KeyValuePair<string, string> val in objVals) {
-					if(i++ > 0)
-						sb.Append(", ");
-
-					sb.AppendFormat("'{0}'", val.Value);
-				}
-
-				sb.Append(");");
-
-				Exec(sb.ToString());
 			}
 		}
 
 		public void WriteField(FieldNode fieldNode, string value) {
-			string colName = null;
+			int colIdx = 0;
 
-			if(!colNames.TryGetValue(fieldNode, out colName)) {
+			if(!colIdxs.TryGetValue(fieldNode, out colIdx)) {
 				string fieldName = fieldNode.ObjectClassField.Name;
 
-				colNames[fieldNode] = colName = string.Format("{0}{1}", fieldName, colNameCounts[fieldName]);				
+				string colName = string.Format("{0}{1}", fieldName, colNameCounts[fieldName]);
+				
+				//ws.Columns.get_Item(.... Name = colName
 
 				colNameCounts.Inc(fieldName);
-
-				if(!tableCreated) {
-					Exec(string.Format("create table [t] ({0} text);", colName));
-
-					tableCreated = true;
-				}
-				else
-					Exec(string.Format("alter table [t] add column {0} text;", colName));
 			}
 
-			vals.Peek()[colName] = value;
+			vals.Peek()[colIdx] = value;
 
 			throw new Exception("The method or operation is not implemented.");
 		}
 
+		private void Release(object o) {
+			while(Marshal.FinalReleaseComObject(o) != 0) { }
+		}
+
+		private void CleanUp() {
+			lock(sync) {
+				if(wb != null) {
+					wb.Close(Type.Missing, Type.Missing, Type.Missing);
+					Release(wb);
+					wb = null;
+				}
+
+				if(wbs != null) { Release(wbs); wbs = null; }
+				if(ws != null) { Release(ws); ws = null; }
+				if(wss != null) { Release(wss); wss = null; }
+
+				if(app != null) {
+					app.Quit();
+					Release(app);
+					app = null;
+				}
+			}
+		}
+
+		~ExcelWriter() {
+			Console.Error.WriteLine("ExcelWriter Finalizing");
+
+			CleanUp();
+
+			Console.Error.WriteLine("ExcelWriter Finalized");
+		}
+
 		public void Dispose() {
-			//sw.Dispose();
+			Console.Error.WriteLine("Saving Excel Worksheet: " + FilePath);
 
-			conn.Close();
+			File.Delete(FilePath);
 
-			Console.Error.WriteLine("Disonnected from Excel Driver: " + FileName);
+			lock(sync)
+				wb.SaveAs(FilePath, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing,
+					Microsoft.Office.Interop.Excel.XlSaveAsAccessMode.xlExclusive,
+					Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+
+			Console.Error.WriteLine("Disonnecting from Excel");
+
+			//http://support.microsoft.com/kb/306022/en-us
+
+			GC.Collect();
+			GC.WaitForPendingFinalizers();
+
+			CleanUp();
+
+			GC.Collect();
+			GC.WaitForPendingFinalizers();
+
+			Console.Error.WriteLine("Disonnected from Excel");
 		}
 	}
 }

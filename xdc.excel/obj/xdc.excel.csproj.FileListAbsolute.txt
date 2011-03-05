@@ -1,0 +1,10 @@
+C:\BBDC\bbdc\xdc.excel\bin\Debug\xdc.excel.dll
+C:\BBDC\bbdc\xdc.excel\bin\Debug\xdc.excel.pdb
+C:\BBDC\bbdc\xdc.excel\bin\Debug\xdc.common.dll
+C:\BBDC\bbdc\xdc.excel\bin\Debug\xdc.core.dll
+C:\BBDC\bbdc\xdc.excel\bin\Debug\xdc.common.pdb
+C:\BBDC\bbdc\xdc.excel\bin\Debug\xdc.core.pdb
+C:\BBDC\bbdc\xdc.excel\obj\Debug\ResolveAssemblyReference.cache
+C:\BBDC\bbdc\xdc.excel\obj\Debug\xdc.excel.csproj.ResolveComReference.cache
+C:\BBDC\bbdc\xdc.excel\obj\Debug\xdc.excel.dll
+C:\BBDC\bbdc\xdc.excel\obj\Debug\xdc.excel.pdb

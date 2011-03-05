@@ -1,0 +1,280 @@
+using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.IO;
+using System.Text;
+using System.Transactions;
+using System.Xml;
+using bbdc.common;
+using xdc.common;
+using xdc.Nodes;
+
+namespace bbdc {
+	public class BBDCOptions {
+		public string ConnStr = null;
+
+		public string DumpNodeFile = null;
+
+		public bool NoExec = false;
+		public bool NoTrans = false;
+		public bool Commit = false;
+
+		public string XMLRenderFile = null;
+		public string TextSQLFile = null;
+
+		public string UndoSQLFile = null;
+		public string ExcelFile = null;
+		public string XMLFile = null;
+
+		public override string ToString() {
+			StringBuilder sb = new StringBuilder();			
+
+			if(!string.IsNullOrEmpty(DumpNodeFile))
+				sb.AppendLine(string.Format("DumpNodeFile: {0}", DumpNodeFile));
+			
+			sb.AppendLine(string.Format("NoExec: {0}", NoExec));
+			sb.AppendLine(string.Format("NoTrans: {0}", NoTrans));
+			sb.AppendLine(string.Format("Commit: {0}", Commit));
+			
+			if(!string.IsNullOrEmpty(XMLRenderFile))
+				sb.AppendLine(string.Format("XMLRenderFile: {0}", XMLRenderFile));
+			if(!string.IsNullOrEmpty(TextSQLFile))
+				sb.AppendLine(string.Format("TextSQLFile: {0}", TextSQLFile));
+			
+			if(!string.IsNullOrEmpty(UndoSQLFile))
+				sb.AppendLine(string.Format("UndoSQLFile: {0}", UndoSQLFile));
+			if(!string.IsNullOrEmpty(ExcelFile))
+				sb.AppendLine(string.Format("ExcelFile: {0}", ExcelFile));
+			if(!string.IsNullOrEmpty(XMLFile))
+				sb.AppendLine(string.Format("XMLFile: {0}", XMLFile));
+
+			return sb.ToString();
+		}
+	}
+
+	public class BBDC {
+		private BBDCOptions options;
+
+		private List<string> extra = new List<string>();
+
+		public BBDCOptions Options {
+			get { return options; }
+		}
+
+		public BBDC(BBDCOptions _options, IEnumerable<string> _extra) {
+			options = _options;
+
+			extra.AddRange(_extra);
+		}
+
+		private TextWriter GetTextWriter(string file) {
+			if(file == "|")
+				return Console.Out;
+			else
+				return new StreamWriter(file);
+		}
+
+		private bool IsOutputtingToConsole() {
+			return Options.ExcelFile == "|" ||
+				Options.TextSQLFile == "|" ||
+				Options.UndoSQLFile == "|" ||
+				Options.XMLFile == "|" ||
+				Options.XMLRenderFile == "|";
+		}
+
+		private void DumpNodes(RootNode root) {
+			if(!string.IsNullOrEmpty(Options.DumpNodeFile))
+				using(TextWriter tw = GetTextWriter(Options.DumpNodeFile))
+					tw.WriteLine(root.ToString());
+		}
+
+		private void ProcessExtra(RootContext rc, IEnumerable<string> extra) {
+			Dictionary<string, string> consts = rc.GetShared<ConstShared>().Consts;
+
+			int i = 0;
+			foreach(string cur in extra)
+				consts.Add(Convert.ToString(i++), cur);
+		}
+
+		public RootContext PrepareNode(RootNode root) {
+			DumpNodes(root);
+
+			RootContext rc = root.CreateContext();
+
+			ProcessExtra(rc, extra);
+
+			return rc;
+		}
+
+		public int Run(XmlReader xr) {
+			return Run(Enumerations.One(XMLNodeParser.Parse(xr)));
+		}
+
+		public int Run(IEnumerable<RootNode> roots) {
+			return Write(Enumerations.Transform<RootNode, RootContext>(roots,
+				delegate(RootNode r, ref RootContext rc) {
+					rc = PrepareNode(r);
+					return true;
+				}));
+		}
+
+		private int Write(IEnumerable<RootContext> rc) {
+			using(MultiWriter mw = new MultiWriter())
+				return WriteXML(rc, mw);
+		}
+
+		private int WriteXML(IEnumerable<RootContext> rc, MultiWriter mw) {
+			if(string.IsNullOrEmpty(Options.XMLFile))
+				return WriteUndo(rc, mw);
+
+			XmlWriterSettings xws = new XmlWriterSettings();
+			xws.Indent = true;
+
+			using(TextWriter tw = GetTextWriter(Options.XMLFile))
+			using(XmlWriter xw_ = XmlWriter.Create(tw, xws))
+			using(IWriter xw = new XMLWriter(xw_)) {
+				mw.AddWriter(xw);
+				return WriteUndo(rc, mw);
+			}
+		}
+
+		private int WriteUndo(IEnumerable<RootContext> rc, MultiWriter mw) {
+			if(string.IsNullOrEmpty(Options.UndoSQLFile))
+				return WriteExcel(rc, mw);
+
+			using(TextWriter uw_ = GetTextWriter(Options.UndoSQLFile))
+			using(IWriter uw = new SQLUndoWriter(uw_)) {
+				mw.AddWriter(uw);
+				return WriteExcel(rc, mw);
+			}
+		}
+
+		private int WriteExcel(IEnumerable<RootContext> rc, MultiWriter mw) {
+			if(string.IsNullOrEmpty(Options.ExcelFile))
+				return Render(rc, mw);
+
+			using(IWriter ew = new ExcelWriter(Options.ExcelFile)) {
+				mw.AddWriter(ew);
+				return Render(rc, mw);
+			}
+		}
+
+		private int Render(IEnumerable<RootContext> rc, MultiWriter mw) {
+			using(MultiRenderer mr = new MultiRenderer())
+				return RenderXML(rc, mr, mw);
+		}
+
+		private int RenderXML(IEnumerable<RootContext> rc, MultiRenderer mr, MultiWriter mw) {
+			if(string.IsNullOrEmpty(Options.XMLRenderFile))
+				return RenderTextSQL(rc, mr, mw);
+			
+			XmlWriterSettings xws = new XmlWriterSettings();
+			xws.Indent = true;
+
+			using(TextWriter tw = GetTextWriter(Options.XMLRenderFile))
+			using(XmlWriter xw = XmlWriter.Create(tw, xws))
+			using(IRenderer xr = new XMLRenderer(xw)) {
+				mr.AddRenderer(xr);
+				return RenderTextSQL(rc, mr, mw);
+			}
+		}
+
+		private int RenderTextSQL(IEnumerable<RootContext> rc, MultiRenderer mr, MultiWriter mw) {
+			if(string.IsNullOrEmpty(Options.TextSQLFile))
+				return RenderExecSQL(rc, mr, mw);
+
+			using(TextWriter tw = GetTextWriter(Options.TextSQLFile))
+			using(SQLRenderTarget srt = new AnnotatedTextSQLRenderTarget(tw))
+			using(IRenderer sr = new BBSQLRenderer(srt)) {
+				mr.AddRenderer(sr);
+				return RenderExecSQL(rc, mr, mw);
+			}
+		}
+
+		private DateTime GetDBTime(SqlConnection conn) {
+			using(SqlCommand cmd = new SqlCommand("select getdate();", conn))
+				return (DateTime)cmd.ExecuteScalar();
+		}
+
+		private int RenderExecSQL(IEnumerable<RootContext> rc, MultiRenderer mr, MultiWriter mw) {
+			if(Options.NoExec)
+				return Run(rc, mr);
+
+			if(Options.NoTrans)
+				return RenderExecSQLInternal(rc, mr, mw);
+
+			int ret = 0;
+
+			try {
+				using(TransactionScope ts = new TransactionScope(TransactionScopeOption.RequiresNew, new TimeSpan(12, 0, 0))) {
+					Console.Error.WriteLine("Entered Transaction");
+
+					ret = RenderExecSQLInternal(rc, mr, mw);
+
+					if(Options.Commit) {
+						Console.Error.WriteLine("Commiting Transaction");
+
+						ts.Complete();
+
+						Console.Error.WriteLine("Transaction Committed");
+					}
+				}
+			}
+			finally {
+				Console.Error.WriteLine("Exited Transaction");
+			}
+
+			return ret;
+		}
+
+		private int RenderExecSQLInternal(IEnumerable<RootContext> rc, MultiRenderer mr, MultiWriter mw) {
+			if(Options.NoExec)
+				return Run(rc, mr);
+
+			try {
+				using(SqlConnection conn = new SqlConnection(Options.ConnStr)) {
+					conn.Open();
+
+					Console.Error.WriteLine("Connected to Database");
+
+					try {
+						Console.Error.WriteLine("Database Time: '{0}'", GetDBTime(conn).ToString());
+
+						using(SQLRenderTarget srt = new ExecSQLRenderTarget(conn, mw, !IsOutputtingToConsole()))
+						using(IRenderer sr = new BBSQLRenderer(srt)) {
+							mr.AddRenderer(sr);
+
+							return Run(rc, mr);
+						}
+					}
+					finally {
+						Console.Error.WriteLine("Database Time: '{0}'", GetDBTime(conn).ToString());
+
+						Console.Error.WriteLine("Disconnected from Database");
+					}
+				}
+			}
+			finally {
+				Console.Error.WriteLine("Done with Database");
+			}
+		}
+
+		private int Run(IEnumerable<RootContext> rcs, MultiRenderer mr) {
+			mr.Report = true;
+
+			int ret = 0;
+
+			foreach(RootContext rc in rcs) {
+				Console.Error.WriteLine("Beginning Batch");
+
+				int count = mr.Render(rc.Objects);
+
+				Console.Error.WriteLine("Batch Complete - Objects Processed: {0}", count);
+				
+				ret += count;
+			}
+
+			return ret;
+		}
+	}
+}
