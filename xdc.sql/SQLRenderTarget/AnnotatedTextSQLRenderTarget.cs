@@ -69,14 +69,14 @@ namespace xdc.Nodes {
 			if(++objectCount % 100 == 0)
 				Emit(string.Format("print '#{0}';" + Environment.NewLine, objectCount));
 
-			if(objectNode.ObjectClass.Atts.GetBool("Write"))
+			if(objectNode.ShouldWrite)
 				Emit(string.Format("print '<{0}>';" + Environment.NewLine, objectNode.ObjectClass.Name));
 		}
 
 		public override void LeaveObject(ObjectNode objectNode) {
 			base.LeaveObject(objectNode);
 
-			if(objectNode.ObjectClass.Atts.GetBool("Write"))
+			if(objectNode.ShouldWrite)
 				Emit(string.Format("print '</{0}>';" + Environment.NewLine, objectNode.ObjectClass.Name));
 		}
 

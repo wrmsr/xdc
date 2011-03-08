@@ -122,7 +122,7 @@ namespace xdc.Nodes {
 
 				sb.Append(rendered);
 
-				if(field.ObjectClassField.Atts.GetBool("Write"))
+				if(field.Node.ShouldWrite)
 					Target.WriteFieldSQL(field.Node, rendered);
 			}
 

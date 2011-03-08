@@ -14,17 +14,17 @@ namespace xdc.Nodes {
 		}
 
 		public void EnterObject(ObjectNode objectNode) {
-			if(objectNode.ObjectClass.Atts.GetBool("Write"))
+			if(objectNode.ShouldWrite)
 				xw.WriteStartElement(objectNode.ObjectClass.Name);
 		}
 
 		public void LeaveObject(ObjectNode objectNode) {
-			if(objectNode.ObjectClass.Atts.GetBool("Write"))
+			if(objectNode.ShouldWrite)
 				xw.WriteEndElement();
 		}
 
 		public void WriteField(FieldNode fieldNode, string value) {
-			if(fieldNode.ObjectClassField.Parent.Atts.GetBool("Write") && fieldNode.ObjectClassField.Atts.GetBool("Write"))
+			if(fieldNode.ShouldWrite && fieldNode.CurrentObject.ShouldWrite)
 				xw.WriteElementString(fieldNode.ObjectClassField.Name, value);
 		}
 

@@ -56,6 +56,10 @@ namespace xdc.Nodes {
 			get { return objectClassField; }
 		}
 
+		public bool ShouldWrite {
+			get { return Atts.GetBool("Write") || ObjectClassField.Atts.GetBool("Write"); }
+		}
+
 		public FieldNode(Node parent, Atts atts)
 			: base(parent, atts) {
 			string fieldName = null;

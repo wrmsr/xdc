@@ -80,6 +80,10 @@ namespace xdc.Nodes {
 			}
 		}
 
+		public bool ShouldWrite {
+			get { return Atts.GetBool("Write") || ObjectClass.Atts.GetBool("Write"); }
+		}
+
 		public ObjectNode(Node parent, Atts atts)
 			: base(parent, atts) {
 			string className = null;
