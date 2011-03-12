@@ -13,14 +13,7 @@ namespace xdc.Nodes {
 
 		public override IEnumerable<WeakNodeContext> Children {
 			get {
-				int to = 0;
-
-				if(Node.Atts.ContainsKey("Rand")) {
-					string[] randParts = Node.Atts["Rand"].Split('-');
-					to = Root.Rand.Next(Convert.ToInt32(randParts[0]), Convert.ToInt32(randParts[1]) + 1);
-				}
-				else if(Node.Atts.ContainsKey("To"))
-					to = Convert.ToInt32(Node.Atts["To"]);
+				int to = Node.GetTimes(Root.Rand);
 
 				for(i = 0; i < to; i++)
 					foreach(Node child in Node.Children) {
@@ -45,6 +38,25 @@ namespace xdc.Nodes {
 	public class TimesNode : MetaNode {
 		public override Type ContextType {
 			get { return typeof(TimesContext); }
+		}
+
+		public override int ObjectCount {
+			get {
+				return GetTimes(new Random()) * base.ObjectCount;
+			}
+		}
+
+		public int GetTimes(Random rand) {
+			int to = 0;
+
+			if(Atts.ContainsKey("Rand")) {
+				string[] randParts = Atts["Rand"].Split('-');
+				to = rand.Next(Convert.ToInt32(randParts[0]), Convert.ToInt32(randParts[1]) + 1);
+			}
+			else if(Atts.ContainsKey("To"))
+				to = Convert.ToInt32(Atts["To"]);
+
+			return to;
 		}
 
 		public TimesNode(Node parent, Atts atts)

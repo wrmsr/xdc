@@ -84,6 +84,15 @@ namespace xdc.Nodes {
 			get { return Atts.GetBool("Write") || ObjectClass.Atts.GetBool("Write"); }
 		}
 
+		private string name = null;
+		public override string Name {
+			get { return name; }
+		}
+
+		public override int ObjectCount {
+			get { return 1 + base.ObjectCount; }
+		}
+
 		public ObjectNode(Node parent, Atts atts)
 			: base(parent, atts) {
 			string className = null;
@@ -96,14 +105,16 @@ namespace xdc.Nodes {
 			if(objectClass == null)
 				throw new ApplicationException("Class not found: " + className);
 
-			if(string.IsNullOrEmpty(Name)) {
+			name = Atts.TryGetValue("Name");
+
+			if(string.IsNullOrEmpty(name)) {
 				int c = 1;
 
 				foreach(Node cur in Parents)
 					if(cur.TopClassName == TopClassName)
 						c++;
 
-				Atts["Name"] = TopClassName + Convert.ToString(c);
+				name = TopClassName + Convert.ToString(c);
 			}
 
 			List<FieldNode> fields = new List<FieldNode>();

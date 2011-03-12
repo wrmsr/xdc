@@ -13,6 +13,13 @@ namespace xdc.common {
 			yield return v;
 		}
 
+		static public int Count<T>(IEnumerable<T> vs) {
+			int ret = 0;
+			foreach(T v in vs)
+				ret++;
+			return ret;
+		}
+
 		static public IEnumerable<T> From<T>(params T[] vs) {
 			foreach(T v in vs)
 				yield return v;

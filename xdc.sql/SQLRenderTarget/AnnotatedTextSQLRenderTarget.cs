@@ -52,6 +52,8 @@ namespace xdc.Nodes {
 		}
 
 		private void WriteStart() {
+			Emit("set nocount on;" + Environment.NewLine);
+
 			Emit("begin transaction;" + Environment.NewLine);
 
 			Emit("print '<Objects>';" + Environment.NewLine);

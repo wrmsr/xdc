@@ -51,6 +51,12 @@ namespace xdc.Nodes {
 			}
 		}
 
+		public override int ObjectCount {
+			get {
+				return Enumerations.Count(Items) * base.ObjectCount;
+			}
+		}
+
 		public ForEachNode(Node parent, Atts atts)
 			: base(parent, atts) {
 			if(!Atts.ContainsKey("In"))

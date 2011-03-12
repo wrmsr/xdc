@@ -104,6 +104,16 @@ namespace xdc.Nodes {
 			}
 		}
 
+		public virtual int ObjectCount {
+			get {
+				//zipWith lol
+				int ret = 0;
+				foreach(Node child in Children)
+					ret += child.ObjectCount;
+				return ret;
+			}
+		}
+
 		#endregion
 
 		#region Atts
@@ -114,7 +124,7 @@ namespace xdc.Nodes {
 			get { return atts; }
 		}
 
-		public string Name {
+		public virtual string Name {
 			get { return Atts.TryGetValue("Name"); }
 		}
 

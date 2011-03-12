@@ -44,10 +44,6 @@ namespace xdc.common {
 					return null;
 				return v;
 			}
-			//TODO: ReadOnly somehow
-			set {
-				dct[k] = value;
-			}
 		}
 
 		public bool GetBool(string name) {

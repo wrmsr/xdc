@@ -9,6 +9,12 @@ using System.Text.RegularExpressions;
 using xdc.common;
 
 namespace xdc.Nodes {
+	public class ExecSQLRenderTargetOptions {
+		public bool ProgBar = true;
+		public TextWriter SQLDump = null;
+		public int BufSize = 0x40000;
+	}
+
 	public class ExecSQLRenderTarget : SQLRenderTarget {
 		private class Var {
 			public string DataType = null;
@@ -22,13 +28,13 @@ namespace xdc.Nodes {
 		private SqlConnection conn = null;
 		private IWriter writer = null;
 
-		private const int bufSize = 0x40000;
-		private const int execInterval = bufSize - 0x1000;
-		private StringBuilder buf = new StringBuilder(bufSize);
+		private ExecSQLRenderTargetOptions options = new ExecSQLRenderTargetOptions();
+
+		private int execInterval { get { return options.BufSize - 0x1000; } }
+
+		private StringBuilder buf = null;
 
 		private List<SqlError> errors = new List<SqlError>();
-
-		private bool progBar = false;
 
 		public SqlConnection Conn {
 			get { return conn; }
@@ -38,10 +44,12 @@ namespace xdc.Nodes {
 			get { return writer; }
 		}
 
-		public ExecSQLRenderTarget(SqlConnection _conn, IWriter _writer, bool _progBar) {
+		public ExecSQLRenderTarget(SqlConnection _conn, IWriter _writer, ExecSQLRenderTargetOptions _options) {
 			conn = _conn;
 			writer = _writer;
-			progBar = _progBar;
+			options = _options;
+
+			buf = new StringBuilder(options.BufSize);
 		}
 
 		public override void Dispose() {
@@ -57,6 +65,8 @@ namespace xdc.Nodes {
 		}
 
 		protected void EmitPrefix() {
+			buf.AppendLine("set nocount on;" + Environment.NewLine);
+
 			foreach(KeyValuePair<string, Var> cur in declaredVars) {
 				RawDeclareVar(cur.Key, cur.Value.DataType);
 
@@ -153,11 +163,18 @@ namespace xdc.Nodes {
 
 			Console.Error.WriteLine("Executing SQL Buffer: {0} Bytes, {1} Writes Queued", buf.Length, writeQueue.Count);
 
+			if(options.SQLDump != null) {
+				options.SQLDump.WriteLine(buf.ToString());
+				options.SQLDump.WriteLine();
+				options.SQLDump.WriteLine("GO");
+				options.SQLDump.WriteLine(new string('-', 80));
+			}
+
 			SqlInfoMessageEventHandler infoMessage = new SqlInfoMessageEventHandler(conn_InfoMessage);
 
 			writeCount = writeQueue.Count;
 
-			if(progBar)
+			if(options.ProgBar)
 				TextUtils.DrawTextProgressBar(0, writeQueue.Count);
 
 			lastWriteReport = 0;
@@ -183,7 +200,7 @@ namespace xdc.Nodes {
 			finally {
 				conn.InfoMessage -= infoMessage;
 
-				if(progBar)
+				if(options.ProgBar)
 					TextUtils.ClearLine();
 			}
 
@@ -218,7 +235,7 @@ namespace xdc.Nodes {
 			if(writesDone - lastWriteReport > 100) {
 				lastWriteReport = writesDone;
 
-				if(progBar)
+				if(options.ProgBar)
 					TextUtils.DrawTextProgressBar(writesDone, writeCount);
 			}
 		}

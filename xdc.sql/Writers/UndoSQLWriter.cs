@@ -63,6 +63,9 @@ namespace xdc.Nodes {
 		}
 
 		public void WriteStart() {
+			Emit("set nocount on;");
+			Emit();
+
 			Emit("begin transaction;");
 			Emit();
 

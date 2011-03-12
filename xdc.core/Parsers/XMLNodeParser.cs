@@ -6,7 +6,7 @@ using xdc.common;
 
 namespace xdc.Nodes {
 	public class XMLNodeParser {
-		static private Type GetNodeType(string name, Atts atts, Node parentNode) {
+		static private Type GetNodeType(string name, Dictionary<string, string> atts, Node parentNode) {
 			if(parentNode == null)
 				return typeof(RootNode);
 
@@ -46,13 +46,13 @@ namespace xdc.Nodes {
 			if(!xr.Read() || !xr.IsStartElement())
 				throw new ApplicationException("Invalid xml reader state");
 
-			Atts atts = new Atts(XmlUtils.ReadAtts(xr));
+			Dictionary<string, string> atts = XmlUtils.ReadAtts(xr);
 
 			xr.MoveToElement();
 
 			Type nodeType = GetNodeType(xr.Name, atts, parentNode);
 
-			Node node = Node.Create(nodeType, parentNode, atts);
+			Node node = Node.Create(nodeType, parentNode, new Atts(atts));
 
 			while(xr.Read()) {
 				if(xr.IsStartElement()) {

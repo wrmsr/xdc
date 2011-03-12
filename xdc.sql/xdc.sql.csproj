@@ -37,6 +37,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Writers\RedoSQLWriter.cs" />
     <Compile Include="SQLRenderTarget\AnnotatedTextSQLRenderTarget.cs" />
     <Compile Include="SQLRenderTarget\ExecSQLRenderTarget.cs" />
     <Compile Include="Renderers\SQLRenderer.cs" />
