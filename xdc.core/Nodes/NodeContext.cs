@@ -125,7 +125,6 @@ namespace xdc.Nodes {
 		-path = skip instance
 		>path = skip object
 		^path = skip level
-		`path = skip field, ignore name
 		*/
 		public virtual NodeValue GetRefValue(string path) {
 			string[] parts = null;

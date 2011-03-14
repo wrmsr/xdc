@@ -1,5 +1,160 @@
 eXtensible Data Creator
 
-readme pending
+xdc is a library for generating hierarchical test data. It is
+centered around the representation, rendering, and writing of
+objects with fields by nodes. This is currently done from xml
+to sql, but the core itself contains no explicit preference
+for either (save for the object class definition, an xml
+document).
 
-lol
+xdc is designed to be extended with extra, implementation specific
+functionality by its host, allowing arbitrarily complex operations
+to be expressed with consistent syntax.
+
+The central concepts of xdc are objects, fields, nodes, contexts,
+parsers, renderers, and writers.
+
+object:
+	represents a piece of data to be created, such as a user, a
+	transaction, or a payment. These are defined for xdc in the
+	object classes xml file.
+
+field:
+	a property of an object set by xdc during creation, such as
+	a user's name, a transaction's timestamp, or a payment's
+	amount.
+
+node:
+	the fundamental representational structure xdc uses to define
+	data creation. nodes are used to instanciate objects and
+	fields, as well as represnt non-object creation definition
+	such as duplication (via the Times node) and random selection
+	(via Chance and Case nodes).
+
+context:
+	an individual, ephemeral 'instance' of a node. nodes themselves
+	are immutable after parsing - contexts are a node with a state.
+	xdc's strict internal rules regarding contexts and their
+	interaction allows for rendering of an unlimited number of
+	nodes with constant performance and memory usage.
+
+parser:
+	a system for generating nodes. currently two parsers exist: xml
+	and text. the text parser is only for terminal nodes and cannot
+	be used alone.
+
+renderer:
+	a system for creating the objects represented by nodes. the main
+	renderer right now is the sql renderer, which translates the nodes
+	to sql inserts / proc exec's and either writes them to a stream
+	or executes them live. an xml renderer is also present for
+	diagnostic purposes.
+
+writer:
+	writes the results of a renderer, if possible. some renderers, such
+	as the xml and the sql-to-file renderer, do not actually create
+	the objecrs at runtime and thus have no results to report. some,
+	currently only the sql-exec renderer, do wind up with results
+	for writers. writers to xml, excel, and to an undo script exist.
+
+xdc contains a number of node types designed to be strung together to
+represent the desired data. Most of these are exposed directly as node
+names by the xml parser, and many take additional configuration
+attributes.
+
+Root
+	the root node, implicitly created first by the renderer. no other
+	node may exist in isolation - all other nodes require a parent.
+	the root node's context is used to contain global state during
+	a render, such as const values.
+
+Object
+	represents an object to be created, specified by the object classes
+	file. an object node must have a vaild class and may contain fields
+	and other child objects.
+
+Field
+	a field on an object. contains terminal nodes. during a render, the
+	value of the field on the object is set to the node's contents.
+
+Times
+	duplicates its contents during.
+
+Template
+	replaced with the contents of a template file.
+
+Chance
+	selects the contents of a random case node.
+
+Try
+	successively tries its case nodes until a value is returned.
+
+Case
+	used by other nodes to represent a distinct possibility or
+	sub group.
+
+Text
+	a literal text value
+
+Ref
+	a reference to a value on another node. may be an object field,
+	a node attribute, or handled explicitly by the node.
+
+Const
+	retrieves the value of a const.
+
+SetConst
+	sets the value of a const.
+
+ValueFile
+	declares a file from which values are to be used.
+
+FileValue
+	gets a value from a declared valuefile.
+
+Null
+	represents a literal null value.
+
+ForEach
+	iterates through a list of items, duplicating its contents
+	for each item.
+
+With
+	provides a local context of values.
+
+Date
+	specifies a date value with a specified random range and format.
+
+Additionally, the text parser is used in multiple places throughout
+xdc to compactly represent complex values. The syntax for it is as
+follows.
+
+a$b$c = Even chance between a, b, and c
+
+a|b|c = First non empty, non null value of a, b, or c.
+
+%c% = Const value 'c'
+
+#c# = FileValue 'c'
+
+{path} = Reference, defined by the following language. These modifiers
+	may be chained.
+
+	path:	
+		field = take immediate field or return null
+	
+		class:field = find class and take immediate field or return null
+	
+		name.field = find named node and take immediate field or
+			return null
+	
+		class1/class2:field = find class 1, then find class 2 and take
+			field or return null
+	
+	*path = keep trying parents until there aren't any
+
+	-path = skip instance
+
+	>path = skip object
+
+	^path = skip level
