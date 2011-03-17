@@ -140,7 +140,7 @@ namespace xdc.Nodes {
 				Target.DeclareVar(id.Name, "int");
 				Target.SetVar(id.Name, "scope_identity()");
 
-				Target.WriteFieldSQL(id.Node, "cast(scope_identity() as varchar(500))");
+				Target.WriteFieldSQL(id.Node, "cast(scope_identity() as varchar)");
 			}
 		}
 

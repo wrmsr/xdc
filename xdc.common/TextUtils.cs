@@ -66,6 +66,99 @@ namespace xdc.common {
 			Console.CursorLeft = 0;
 		}
 
+		static public string RenderTextProgressBar(int progress, int total, int bars) {
+			int c = (int)((float)progress / (float)total * (float)bars);
+
+			return string.Format("[{0}{1}]",
+				new string('=', c),
+				new string(' ', bars - c));
+		}
+
+		static readonly char[] dancers = new char[] { '-', '/', '|', '\\' };
+		static public char RenderTextDancer(int i, int stride) {
+			return dancers[(i / stride) % dancers.Length];
+		}
+
+		public class ReservedLineConsole : TextWriter {
+			private int reservedLines;
+
+			public int ReservedLines {
+				get { return reservedLines; }
+			}
+
+			public override Encoding Encoding {
+				get { return Console.Out.Encoding; }
+			}
+
+			static public string EmptyLine {
+				get { return new string(' ', Console.WindowWidth - 1); }
+			}
+
+			public ReservedLineConsole(int _reservedLines) {
+				reservedLines = _reservedLines;
+			}
+
+			public void WriteReservedLine(int i, string s) {
+				if(i < 0 || i >= ReservedLines)
+					throw new ArgumentOutOfRangeException();
+
+				int l = Console.CursorLeft;
+				Console.CursorTop += i + 1;
+
+				Console.CursorLeft = 0;
+				Console.Write(EmptyLine);
+
+				Console.CursorLeft = 0;
+				Console.Write(s);
+
+				Console.CursorTop -= i + 1;
+				Console.CursorLeft = l;
+			}
+
+			protected void LineUp() {
+				if(Console.CursorTop < (Console.BufferHeight - ReservedLines - 1)) {
+					Console.MoveBufferArea(
+						0, Console.CursorTop + 1,
+						Console.BufferWidth, ReservedLines,
+						0, Console.CursorTop + 2);
+
+					Console.CursorTop++;
+					Console.CursorLeft = 0;
+
+					Console.Write(EmptyLine);
+					Console.CursorLeft = 0;
+
+					Console.CursorTop += ReservedLines;
+					Console.CursorTop -= ReservedLines;
+				}
+				else {
+					int stride = 100; //0x8000 / (Console.BufferWidth + 2);
+
+					int ofs = Console.CursorTop % stride;
+
+					Console.MoveBufferArea(
+						0, 1,
+						Console.BufferWidth, ofs,
+						0, 0);
+
+					for(int i = ofs; i < Console.CursorTop; i += stride)
+						Console.MoveBufferArea(
+							0, i + 1,
+							Console.BufferWidth, stride,
+							0, i);
+				}
+			}
+
+			public override void Write(char value) {
+				if(value == 10) {
+					LineUp();
+					return;
+				}
+
+				Console.Write(value);
+			}
+		}
+
 		static public string Indent(string str, int ct) {
 			return Indent(str, new string(' ', ct));
 		}

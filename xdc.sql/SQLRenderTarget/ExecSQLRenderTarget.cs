@@ -10,12 +10,14 @@ using xdc.common;
 
 namespace xdc.Nodes {
 	public class ExecSQLRenderTargetOptions {
-		public bool ProgBar = true;
+		public ExecSQLRenderTarget.ProgressHandler ProgressHandler;
 		public TextWriter SQLDump = null;
 		public int BufSize = 0x40000;
 	}
 
 	public class ExecSQLRenderTarget : SQLRenderTarget {
+		public delegate void ProgressHandler(ExecSQLRenderTarget sender, int cur, int total);
+
 		private class Var {
 			public string DataType = null;
 			public object Value = null;
@@ -174,8 +176,8 @@ namespace xdc.Nodes {
 
 			writeCount = writeQueue.Count;
 
-			if(options.ProgBar)
-				TextUtils.DrawTextProgressBar(0, writeQueue.Count);
+			if(options.ProgressHandler != null)
+				options.ProgressHandler(this, 0, writeQueue.Count);
 
 			lastWriteReport = 0;
 
@@ -200,8 +202,8 @@ namespace xdc.Nodes {
 			finally {
 				conn.InfoMessage -= infoMessage;
 
-				if(options.ProgBar)
-					TextUtils.ClearLine();
+				if(options.ProgressHandler != null)
+					options.ProgressHandler(this, 0, 0);
 			}
 
 			if(errors.Count > 0)
@@ -235,8 +237,8 @@ namespace xdc.Nodes {
 			if(writesDone - lastWriteReport > 100) {
 				lastWriteReport = writesDone;
 
-				if(options.ProgBar)
-					TextUtils.DrawTextProgressBar(writesDone, writeCount);
+				if(options.ProgressHandler != null)
+					options.ProgressHandler(this, writesDone, writeCount);
 			}
 		}
 
@@ -261,7 +263,7 @@ namespace xdc.Nodes {
 
 			writeQueue.Enqueue(fieldNode);
 
-			Emit(string.Format("print '=' + {0};" + Environment.NewLine, sql));
+			Emit(string.Format("print '=' + cast({0} as varchar);" + Environment.NewLine, sql));
 		}
 	}
 }

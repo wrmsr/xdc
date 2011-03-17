@@ -5,6 +5,8 @@ using xdc.common;
 
 namespace xdc.Nodes {
 	public class FieldContext : NodeContext<FieldNode> {
+		private bool evaluating = false;
+
 		private NodeValue value = null;
 
 		public ObjectClassField ObjectClassField {
@@ -12,7 +14,25 @@ namespace xdc.Nodes {
 		}
 
 		public NodeValue Value {
-			get { return value; }
+			get {
+				if(value == null) {
+					if(evaluating)
+						throw new ApplicationException("Circular dependency detected: " + Name);
+					
+					evaluating = true;
+					
+					if(!string.IsNullOrEmpty(ObjectClassField.Atts["IsOutput"]))
+						value = new DynamicNodeValue(this);
+					else
+						foreach(NodeContext child in RecursiveChildren)
+							if(child is TerminalContext)
+								value = NodeValue.Concat(value, ((TerminalContext)child).Value);
+
+					evaluating = false;
+				}
+
+				return value;
+			}
 		}
 
 		public string Name {
@@ -21,12 +41,6 @@ namespace xdc.Nodes {
 
 		public FieldContext(NodeContext parent, FieldNode node)
 			: base(parent, node) {
-			if(!string.IsNullOrEmpty(ObjectClassField.Atts["IsOutput"]))
-				value = new DynamicNodeValue(this);
-			else
-				foreach(NodeContext child in RecursiveChildren)
-					if(child is TerminalContext)
-						value = NodeValue.Concat(value, ((TerminalContext)child).Value);
 		}
 
 		public override string ToString() {

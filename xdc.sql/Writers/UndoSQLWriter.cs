@@ -116,6 +116,10 @@ namespace xdc.Nodes {
 			Emit("\tend;");
 
 			Emit();
+			Emit("\tif @@rowcount <> 1");
+			Emit("\t\tprint 'Object not found: ' + cast(@class as varchar(50)) + ' ' + cast(@fk as varchar(50));");
+			
+			Emit();
 			Emit("\tfetch next from o into @fk, @class;");
 			Emit("end;");
 			Emit();

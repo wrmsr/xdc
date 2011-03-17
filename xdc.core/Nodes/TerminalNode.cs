@@ -17,6 +17,10 @@ namespace xdc.Nodes {
 			get { return typeof(TerminalContext); }
 		}
 
+		public override int ObjectCount {
+			get { return 0; }
+		}
+
 		public TerminalNode(Node parent, Atts atts)
 			: base(parent, atts) {
 		}

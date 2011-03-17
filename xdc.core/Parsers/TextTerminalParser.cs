@@ -7,27 +7,35 @@ using xdc.common;
 namespace xdc.Nodes {
 	public class TextTerminalParser {
 		static private Regex escapeRx = new Regex(
-			@"(?<=(^|[^\\]))(?<a>(\\\\)*?)\\(?<b>.)"); //replace w/ ${a}${b}
+			@"\\."); //replace w/ ${a}${b}
 
-		private const string escapeGuard = @"(?<!(^|[^\\])(\\\\)*?\\)";
+		public const string EscapeGuard = @"(?<!(^|[^\\])(\\\\)*?\\)";
 
 		static private Regex chanceRx = new Regex(
-			escapeGuard + @"\$");
+			EscapeGuard + @"\$");
 
 		static private Regex tryRx = new Regex(
-			escapeGuard + @"\|");
+			EscapeGuard + @"\|");
 
 		static private Regex terminalRx = new Regex(
-			escapeGuard + @"(" +
+			EscapeGuard + @"(" +				
 				@"(\%(?<const>[^\%]+)\%)|" +
 				@"(\{(?<ref>[^\{\}]+)\})|" +
 				@"(\#(?<fileval>[^\#]+)\#)" +
 			@")");
 
+		public delegate IEnumerable<Node> TextHandler(Node parentNode, string text);
+		static public TextHandler RootTexthandler = new TextHandler(ParseText);
+		static private IEnumerable<Node> ParseText(Node parentNode, string text) {
+			if(!string.IsNullOrEmpty(text))
+				yield return new TextNode(parentNode, new Atts("Value", text));
+		}
+
 		static private IEnumerable<Node> ParseSingle(Node parentNode, string text) {
 			for(Match m = null; (m = terminalRx.Match(text)) != null && m.Success; ) {
 				if(m.Index > 0)
-					yield return new TextNode(parentNode, new Atts("Value", text.Substring(0, m.Index)));
+					foreach(Node t in RootTexthandler(parentNode, text.Substring(0, m.Index)))
+						yield return t;
 
 				if(m.Groups["const"].Success)
 					yield return new ConstNode(parentNode, new Atts("Name", m.Groups["const"].Value));
@@ -39,10 +47,33 @@ namespace xdc.Nodes {
 				text = text.Substring(m.Index + m.Length);
 			}
 
-			text = escapeRx.Replace(text, "${a}${b}");
+			for(Match m = null; (m = escapeRx.Match(text)) != null && m.Success; ) {
+				if(m.Index > 0)
+					foreach(Node t in RootTexthandler(parentNode, text.Substring(0, m.Index)))
+						yield return t;
 
-			if(!string.IsNullOrEmpty(text))
-				yield return new TextNode(parentNode, new Atts("Value", text));
+				switch(m.Value[1]) {
+					case '0':
+						yield return new NullNode(parentNode, new Atts());
+						break;
+
+					case '\\':
+					case '$': case '|':
+					case '%': case '{': case '}': case '#':
+						yield return new TextNode(parentNode, new Atts("Value", m.Value.Substring(1)));
+						break;
+
+					default:
+						foreach(Node t in RootTexthandler(parentNode, m.Value))
+							yield return t;
+						break;
+				}
+
+				text = text.Substring(m.Index + m.Length);
+			}
+
+			foreach(Node t in RootTexthandler(parentNode, text))
+				yield return t;
 		}
 
 		static private IEnumerable<Node> ParseTries(Node parentNode, string text) {

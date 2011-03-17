@@ -172,6 +172,9 @@ namespace xdc.Nodes {
 			}
 			else if(!(this is RootNode))
 				throw new ArgumentNullException("_parent");
+
+			if(!string.IsNullOrEmpty(atts["Template"]))
+				AddChild(new TemplateNode(this, new Atts("File", atts["Template"])));
 		}
 
 		#endregion

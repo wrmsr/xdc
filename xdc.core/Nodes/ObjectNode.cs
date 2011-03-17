@@ -28,9 +28,16 @@ namespace xdc.Nodes {
 			: base(parent, node) {
 			foreach(WeakNodeContext child in FindDescendents(typeof(FieldNode), typeof(ObjectNode)))
 				if(child.Node is FieldNode) {
-					fields.RemoveAll(delegate(FieldContext f) {
-						return f.ObjectClassField == ((FieldNode)child.Node).ObjectClassField;
-					});
+					if(child.Node.Atts.GetBool("Weak")) {
+						if(fields.Find(delegate(FieldContext f) {
+							return f.ObjectClassField == ((FieldNode)child.Node).ObjectClassField;
+						}) != null)
+							continue;
+					}
+					else
+						fields.RemoveAll(delegate(FieldContext f) {
+							return f.ObjectClassField == ((FieldNode)child.Node).ObjectClassField;
+						});
 
 					fields.Add((FieldContext)child.Context);
 				}
@@ -68,9 +75,22 @@ namespace xdc.Nodes {
 		}
 
 		private ObjectClass objectClass = null;
-
 		public ObjectClass ObjectClass {
-			get { return objectClass; }
+			get {
+				if(objectClass == null) {
+					string className = null;
+
+					if(!Atts.TryGetValue("Class", out className) || string.IsNullOrEmpty(className))
+						throw new ApplicationException("Object has no class");
+
+					objectClass = ObjectClasses.Get(className);
+
+					if(objectClass == null)
+						throw new ApplicationException("Class not found: " + className);
+				}
+
+				return objectClass;
+			}
 		}
 
 		public override IEnumerable<string> ClassNames {
@@ -86,7 +106,23 @@ namespace xdc.Nodes {
 
 		private string name = null;
 		public override string Name {
-			get { return name; }
+			get {
+				if(name == null) {
+					name = Atts.TryGetValue("Name");
+
+					if(string.IsNullOrEmpty(name)) {
+						int c = 1;
+
+						foreach(Node cur in Parents)
+							if(cur.TopClassName == TopClassName)
+								c++;
+
+						name = TopClassName + Convert.ToString(c);
+					}
+				}
+				
+				return name;
+			}
 		}
 
 		public override int ObjectCount {
@@ -95,30 +131,6 @@ namespace xdc.Nodes {
 
 		public ObjectNode(Node parent, Atts atts)
 			: base(parent, atts) {
-			string className = null;
-
-			if(!atts.TryGetValue("Class", out className) || string.IsNullOrEmpty(className))
-				throw new ApplicationException("Object has no class");
-
-			objectClass = ObjectClasses.Get(className);
-
-			if(objectClass == null)
-				throw new ApplicationException("Class not found: " + className);
-
-			name = Atts.TryGetValue("Name");
-
-			if(string.IsNullOrEmpty(name)) {
-				int c = 1;
-
-				foreach(Node cur in Parents)
-					if(cur.TopClassName == TopClassName)
-						c++;
-
-				name = TopClassName + Convert.ToString(c);
-			}
-
-			List<FieldNode> fields = new List<FieldNode>();
-
 			foreach(ObjectClassField f in Enumerations.Reverse(ObjectClass.Fields)) {
 				if(!string.IsNullOrEmpty(f.Atts["IsOutput"])) { //IsOutput
 					AddChild(new FieldNode(this, new Atts("Name", f.FullName)));
@@ -130,32 +142,29 @@ namespace xdc.Nodes {
 				if(!string.IsNullOrEmpty(def)) {
 					FieldNode fn = new FieldNode(this, new Atts("Name", f.FullName));
 					fn.AddChildren(TextTerminalParser.Parse(fn, def));
-					fields.Add(fn);
+					AddChild(fn);
 
 					continue;
 				}
 			}
 
 			foreach(KeyValuePair<string, string> att in Atts) {
-				ObjectClassField field = ObjectClass.Fields[att.Key];
+				string key = att.Key.TrimEnd('.');
 
-				if(field != null)
-					fields.Add(new FieldNode(this, new Atts("Name", att.Key, "Value", att.Value)));
+				ObjectClassField field = ObjectClass.Fields[key];
+
+				if(field != null) {
+					Dictionary<string, string> fieldAtts = new Dictionary<string,string>();
+					fieldAtts["Name"] = key;
+					fieldAtts["Value"] = att.Value;
+
+					if(att.Key.EndsWith("."))
+						fieldAtts["Write"] = "True";
+
+					FieldNode fieldNode = new FieldNode(this, new Atts(fieldAtts));
+					AddChild(fieldNode);
+				}
 			}
-
-			//TODO: Sort by inheritence:
-			// Highest classes defaults [simples] first
-			// Lowest classes ctors [complexes] first
-			//TODO: more ingelligent complex sorting - e.g. a RefNode to a Times is still simple
-			//TODO: MOVE THIS TO OBJECTCONTEXT - make it get weak FieldNode refs, sort intelligently
-			List<Node> complexFields = new List<Node>();
-			foreach(FieldNode field in fields)
-				if(field.HasChild(typeof(RefNode)))
-					complexFields.Add(field);
-				else
-					AddChild(field);
-
-			AddChildren(complexFields);
 		}
 
 		public override string ToStringAnnotation() {
