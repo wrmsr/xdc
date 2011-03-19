@@ -239,4 +239,27 @@ namespace xdc.Nodes {
 			: base (parent, node) {
 		}
 	}
+
+	public class NodeContextException : ApplicationException {
+		private NodeContext context;
+
+		public NodeContext Context {
+			get { return context; }
+		}
+
+		public NodeContextException(NodeContext _context)
+			: base() {
+			node = _node;
+		}
+
+		public NodeContextException(NodeContext _context, string message)
+			: base(message) {
+			node = _node;
+		}
+
+		public NodeContextException(NodeContext _context, string message, Exception innerException)
+			: base(message, innerException) {
+			node = _node;
+		}
+	}
 }

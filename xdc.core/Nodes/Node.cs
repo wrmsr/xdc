@@ -237,5 +237,28 @@ namespace xdc.Nodes {
 
 			return null;
 		}
+
+		public class NodeException : ApplicationException {
+			private Node node;
+
+			public Node Node {
+				get { return node; }
+			}
+
+			public NodeException(Node _node)
+				: base() {
+				node = _node;
+			}
+
+			public NodeException(Node _node, string message)
+				: base(message) {
+				node = _node;
+			}
+
+			public NodeException(Node _node, string message, Exception innerException)
+				: base(message, innerException) {
+				node = _node;
+			}
+		}
 	}
 }
