@@ -117,14 +117,15 @@ namespace xdc.Nodes {
 		}
 
 		/*
-		field
-		class:field
-		name.field
+		field = local field only
+		class:field = any class:field instance
+		name.field = any name.field instance
 		class/class:field
 		*path = take any
 		-path = skip instance
 		>path = skip object
 		^path = skip level
+		!path = local only (useful with base classes)
 		*/
 		public virtual NodeValue GetRefValue(string path) {
 			string[] parts = null;
@@ -151,7 +152,7 @@ namespace xdc.Nodes {
 			NodeValue value = null;
 			bool named = false;
 
-			string target = path.Trim('-', '*');
+			string target = path.Trim('-', '*', '!');
 
 			if(named = (parts = target.Split('.')).Length > 1)
 				target = Node.Name == parts[0] ? parts[1] : null;
@@ -163,7 +164,7 @@ namespace xdc.Nodes {
 
 			if(Parent != null) {
 				if(value == null) {
-					if(named || path.StartsWith("*") || !(Node is ObjectNode))
+					if(!(Node is ObjectNode) || (!path.StartsWith("!") && (named || path.StartsWith("*"))))
 						return Parent.GetRefValue(path);
 				}
 				else if(path.StartsWith("-"))
@@ -249,17 +250,17 @@ namespace xdc.Nodes {
 
 		public NodeContextException(NodeContext _context)
 			: base() {
-			node = _node;
+			context = _context;
 		}
 
 		public NodeContextException(NodeContext _context, string message)
 			: base(message) {
-			node = _node;
+			context = _context;
 		}
 
 		public NodeContextException(NodeContext _context, string message, Exception innerException)
 			: base(message, innerException) {
-			node = _node;
+			context = _context;
 		}
 	}
 }

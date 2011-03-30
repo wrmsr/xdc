@@ -13,9 +13,9 @@ namespace xdc.Nodes {
 
 		public override IEnumerable<WeakNodeContext> Children {
 			get {
-				int to = Node.GetTimes(Root.Rand);
+				Pair<int> range = Node.GetRange(Root.Rand);
 
-				for(i = 0; i < to; i++)
+				for(i = range.a; i < range.b; i++)
 					foreach(Node child in Node.Children) {
 						//Yick, soft clone
 						//TODO: use namedValues
@@ -42,21 +42,25 @@ namespace xdc.Nodes {
 
 		public override int ObjectCount {
 			get {
-				return GetTimes(new Random()) * base.ObjectCount;
+				Pair<int> range = GetRange(new Random());
+				return (range.b - range.a) * base.ObjectCount;
 			}
 		}
 
-		public int GetTimes(Random rand) {
-			int to = 0;
-
+		public Pair<int> GetRange(Random rand) {
+			Pair<int> ret = new Pair<int>(0, 0);
+			
 			if(Atts.ContainsKey("Rand")) {
 				string[] randParts = Atts["Rand"].Split('-');
-				to = rand.Next(Convert.ToInt32(randParts[0]), Convert.ToInt32(randParts[1]) + 1);
+				ret.b = rand.Next(Convert.ToInt32(randParts[0]), Convert.ToInt32(randParts[1]) + 1);
 			}
 			else if(Atts.ContainsKey("To"))
-				to = Convert.ToInt32(Atts["To"]);
+				ret.b = Convert.ToInt32(Atts["To"]);
 
-			return to;
+			if(Atts.ContainsKey("From"))
+				ret.a = Convert.ToInt32(atts["From"]);
+
+			return ret;
 		}
 
 		public TimesNode(Node parent, Atts atts)
