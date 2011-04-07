@@ -33,6 +33,7 @@ namespace xdc.Nodes {
 			dict.Add("ForEach", typeof(ForEachNode));
 			dict.Add("With", typeof(WithNode));
 			dict.Add("Date", typeof(DateNode));
+			dict.Add("Counter", typeof(CounterNode));
 
 			return dict;
 		}

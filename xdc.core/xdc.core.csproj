@@ -40,6 +40,7 @@
     <Compile Include="Nodes\CaseNode.cs" />
     <Compile Include="Nodes\ChanceNode.cs" />
     <Compile Include="Nodes\ConstNode.cs" />
+    <Compile Include="Nodes\CounterNode.cs" />
     <Compile Include="Nodes\DateNode.cs" />
     <Compile Include="Nodes\FieldNode.cs" />
     <Compile Include="Nodes\FileValueNode.cs" />

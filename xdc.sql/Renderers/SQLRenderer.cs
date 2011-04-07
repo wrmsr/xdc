@@ -94,6 +94,7 @@ namespace xdc.Nodes {
 			sb.AppendLine();
 			sb.Append("\t");
 
+			//FIXME TODO - CHANGE TO LOCALFIELDS, lest you include parent cols on children - why does this work now??
 			List<FieldContext> fieldParams = new List<FieldContext>(
 				context.Fields.FindAll(delegate(FieldContext fld) {
 				return fld.ObjectClassField.Parent.Name == objectClass.Name &&
@@ -152,6 +153,9 @@ namespace xdc.Nodes {
 
 			int c = 0;
 			foreach(FieldContext field in context.Fields) {
+				if(string.IsNullOrEmpty(field.ObjectClassField.Atts["Param"]))
+					continue;
+
 				if(c++ > 0)
 					sb.AppendLine(", ");
 
@@ -169,6 +173,13 @@ namespace xdc.Nodes {
 			sb.AppendLine(";");
 
 			Target.Emit(sb.ToString());
+
+			foreach(FieldContext field in context.Fields) {
+				if(string.IsNullOrEmpty(field.ObjectClassField.Atts["Param"]) || !field.ObjectClassField.Atts.GetBool("IsOutput"))
+					continue;
+
+				Target.WriteFieldSQL(field.Node, string.Format("cast(@{0} as varchar)", field.Name));
+			}
 		}
 
 		public override void RenderObjectAs(ObjectContext context, ObjectClass objectClass) {
