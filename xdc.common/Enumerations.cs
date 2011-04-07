@@ -4,6 +4,28 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace xdc.common {
+	public class Pair<A, B> {
+		public A a;
+		public B b;
+
+		public Pair() {
+		}
+
+		public Pair(A _a, B _b) {
+			a = _a;
+			b = _b;
+		}
+	}
+
+	public class Pair<A> : Pair<A, A> {
+		public Pair() {
+		}
+
+		public Pair(A _a, A _b)
+			: base(_a, _b) {
+		}
+	}
+
 	static public class Enumerations {
 		static public IEnumerable<T> None<T>() {
 			yield break;
