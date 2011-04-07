@@ -49,7 +49,7 @@ namespace xdc.Nodes {
 
 		public Pair<int> GetRange(Random rand) {
 			Pair<int> ret = new Pair<int>(0, 0);
-			
+
 			if(Atts.ContainsKey("Rand")) {
 				string[] randParts = Atts["Rand"].Split('-');
 				ret.b = rand.Next(Convert.ToInt32(randParts[0]), Convert.ToInt32(randParts[1]) + 1);

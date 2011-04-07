@@ -94,7 +94,7 @@ namespace xdc.common {
 				if(f(v, ref x))
 					yield return x;
 			}
-		}		
+		}
 
 		static public bool Exists<T>(IEnumerable<T> e, Predicate<T> match) {
 			foreach(T v in e)
@@ -103,7 +103,7 @@ namespace xdc.common {
 
 			return false;
 		}
-		
+
 		static public T Find<T>(IEnumerable<T> e, Predicate<T> match) {
 			foreach(T v in e)
 				if(match(v))
@@ -111,7 +111,7 @@ namespace xdc.common {
 
 			return default(T);
 		}
-		
+
 		static public IEnumerable<T> FindAll<T>(IEnumerable<T> e, Predicate<T> match) {
 			foreach(T v in e)
 				if(match(v))
