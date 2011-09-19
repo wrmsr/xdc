@@ -11,7 +11,7 @@ namespace xdc.Nodes {
 		public DateContext(NodeContext parent, TerminalNode node)
 			: base(parent, node) {
 			DateTime to = !string.IsNullOrEmpty(Node.Atts["To"]) ? DateTime.Parse(Node.Atts["To"]) : Root.Now;
-			DateTime from  = !string.IsNullOrEmpty(Node.Atts["To"]) ? DateTime.Parse(Node.Atts["To"]) : Root.Now;
+			DateTime from  = !string.IsNullOrEmpty(Node.Atts["From"]) ? DateTime.Parse(Node.Atts["From"]) : Root.Now;
 			
 			TimeSpan diff = to.Subtract(from);
 			DateTime dt = to.AddMilliseconds(Root.Rand.Next(diff.Milliseconds));
